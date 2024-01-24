@@ -16,3 +16,30 @@ module "codebuild_base_containers" {
   # github_api_token           = data.aws_ssm_parameter.github_pat  # Uncomment to provide PAT from Parameter Store
   # github_api_token           = data.vault_generic_secret.github_pat  # Uncomment to provide PAT from Vault
 }
+
+resource "aws_ecr_repository" "dataiku_container_exec" {
+  name                 = "dataiku-dss-container-exec-base"
+  image_tag_mutability = "MUTABLE"
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+  tags = var.common_tags
+}
+
+resource "aws_ecr_repository" "dataiku_apideployer" {
+  name                 = "dataiku-dss-apideployer-base"
+  image_tag_mutability = "MUTABLE"
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+  tags = var.common_tags
+}
+
+resource "aws_ecr_repository" "dataiku_spark_exec" {
+  name                 = "dataiku-dss-spark-exec-base"
+  image_tag_mutability = "MUTABLE"
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+  tags = var.common_tags
+}
