@@ -1,0 +1,9 @@
+
+# Leave blank line above
+# Dockerfile commands: Lines are appended immediately after the initial FROM
+
+
+RUN echo Prepended dockerfile commands
+
+
+# Leave blank line below

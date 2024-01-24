@@ -1,0 +1,7 @@
+init_config:
+  is_jmx: {{ is_jmx_enabled }}
+  collect_default_metrics: {{ collect_default_metrics_enabled }}
+instances:
+  - host: localhost
+    port: 9999
+    name: backend-dss

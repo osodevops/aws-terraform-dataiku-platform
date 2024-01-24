@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+echo Mock executing dssadmin with $1

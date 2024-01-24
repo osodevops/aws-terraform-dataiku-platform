@@ -1,0 +1,207 @@
+{
+  "dss": {
+    "endpoint_url": {"backend_provider": "environment", "env_var": "DATAIKU_API_ENDPOINT", "default": "http://localhost:11200"},
+    "admin_key": {"backend_provider": "environment", "env_var": "DATAIKU_API_TOKEN", "default": ""},
+    "admin_user": "admin",
+    "deployment_path": "/data/dataiku",
+    "os_user": "dataiku",
+    "vault_role" "dataiku",
+    "vault_endpoint":  "some_endpoint",
+    "vault_skip_tls":  true,
+    "vault_path":  "somepath",
+    "vault_os_nonce_path":  "/etc/vault/none.dat",
+    "vault_mock": false
+
+  },
+  "pre_prod_alb_automation_dns_name": "default",
+  "prod_alb_automation_dns_name": "default",
+  "deployment": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key": "deployment"},
+  "set_user_profile": {
+    "when": "always",
+    "user": "admin",
+    "profile": "DESIGNER"
+  },
+  "set_admin_password": {
+    "when": "always",
+    "user": "admin",
+    "password": {"backend_provider": "vault", "vault_path": "/thing", "vault_key": "password"}
+  },
+  "update_license": {
+    "when": "always",
+    "license": {"backend_provider": "file", "filename": "/home/dataiku/license.txt"}
+  },
+  "install_ini_settings": {
+    "when": "always",
+    "automation": {
+      "inipath": "/data/dataiku/install.ini",
+      "literal_inicontents": {
+        "javaopts": {
+          "backend.xmx": "2g",
+          "backend.additional.opts": "-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.rmi.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=$(/usr/bin/curl s --connect-timeout 2 http://169.254.169.254/latest/meta-data/local-ipv4)"
+        }
+      }
+    },
+    "design": {
+      "inipath": "/data/dataiku/install.ini",
+      "literal_inicontents": {
+        "javaopts": {
+          "backend.xmx": "2g",
+          "backend.additional.opts": "-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.rmi.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=$(/usr/bin/curl s --connect-timeout 2 http://169.254.169.254/latest/meta-data/local-ipv4)"
+        }
+      }
+    }
+  },
+  "configure_rds": {
+    "when": "once",
+    "rds_port": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key": "rds_port"},
+    "rds_endpoint": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key": "rds_endpoint"},
+    "rds_database_name": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key": "rds_database_name"},
+    "rds_schema_name": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key": "rds_schema_name"},
+    "rds_force_db_initialisation": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key": "rds_force_db_initialisation"},
+    "rds_username": {"backend_provider": "vault", "vault_path": "/rds_vault_path", "vault_key": "username"},
+    "rds_password": {"backend_provider": "vault", "vault_path": "/rds_vault_path", "vault_key": "password"}
+  },
+  "plugins": {
+    "when": "once",
+    "design": {
+      "plugins": [
+        {
+          "plugin": "eks-clusters",
+          "code_environment_name": "plugin_eks-clusters_managed",
+          "build_code_environment": true
+        }
+      ]
+    }
+  },
+  "eks_cluster": {
+    "when": "always",
+    "cluster_id": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key": "cluster_id"},
+    "cluster_type": "pycluster_eks-clusters_attach-eks-cluster",
+    "cluster_region": "eu-west-2",
+    "set_as_default_cluster": true
+  },
+  "containerized_execution": {
+    "when": "always",
+    "container_type": "executionConfigs",
+    "cluster_id": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key": "cluster_id"},
+    "base_image_name": "dataiku-dss-container-exec-base:dss-{dynamic_config.get('dss_version')}-r-py3.7",
+    "namespace": "dataiku",
+    "registry_host": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key": "registry_host"}
+  },
+  "cgroups": {
+    "when": "always",
+    "literal_cgroup_limits": [
+      {
+        "key": "memory.limit_in_bytes",
+        "value": "95g"
+      }
+    ]
+  },
+
+  "connections": {
+    "when": "always",
+    "connections": [
+      {
+        "name": "s3_bucket_connection",
+        "params": {
+          "credentialsMode": "ENVIRONMENT",
+          "defaultManagedBucket": "",
+          "defaultManagedPath": "/dataiku",
+          "regionOrEndpoint": "eu-west-2",
+          "hdfsInterface": "S3A",
+          "encryptionMode": "SSE_S3",
+          "switchToRegionFromBucket": "true",
+          "usePathMode": "false",
+          "metastoreSynchronizationMode": "KEEP_IN_SYNC"
+        },
+        "type": "EC2",
+        "usable_by": "ALLOWED",
+        "allowed_groups": ["administrators", "data_team"]
+      },
+      {
+        "name": "redshift_connection",
+        "params": {
+          "namingRule": {
+            "tableNameDatasetNamePrefix": "${projectKey}_"
+          },
+          "driverMode": "CUSTOM_REDSHIFT",
+          "redshiftAuthenticationMode": "USER_PASSWORD",
+          "properties": [
+              {
+                  "name": "ssl",
+                  "value": "true",
+                  "secret": "false"
+              }
+          ],
+          "jarsDirectory": "lib/jdbc/aws-redshift",
+          "dkuProperties": [],
+          "iamRole": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key": "cluster_id"},
+          "host": "statichost",
+          "port": "1234",
+          "db": "db_name",
+          "user": {"backend_provider": "vault", "vault_path": "/redshift", "vault_key": "user"},
+          "password": {"backend_provider": "vault", "vault_path": "/redshift", "vault_key": "password"}
+        },
+        "type": "Redshift",
+        "usable_by": "ALLOWED",
+        "allowed_groups": ["administrators", "data_team"]
+      }
+    ]
+  },
+
+  "api_infrastructure": {
+    "when": "always",
+    "cluster_id": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key": "cluster_id"},
+    "stage": "Development",
+    "type": "K8S",
+    "namespace": "dataiku",
+    "registry_host": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key": "registry_host"},
+    "image_name_prefix": "dss",
+    "base_image_name": "dataiku-dss-apideployer-base:dss-{dynamic_config.get('dss_version')}-r-py3.7"
+  },
+
+  "project_infrastructures": {
+    "when": "always",
+    "infrastructures": [
+      {
+        "name": "pre_prod_automation",
+        "stage": "Development",
+        "admin_key": {"backend_provider": "parameter_store", "path": "/pre-prod/automation/admin/key"},
+        "dns_name": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json", "key":  "pre_prod_alb_automation_dns_name"},
+        "trust_all_certs": true
+      },
+      {
+        "name": "prod_automation",
+        "stage": "Development",
+        "admin_key": {"backend_provider": "parameter_store", "path": "/prod/automation/admin/key"},
+        "dns_name": {"backend_provider": "json_file", "filename": "/opt/dataiku-configurator/dynamic-settings.json",  "key":  "prod_alb_automation_dns_name"},
+        "trust_all_certs": true
+      }
+    ]
+  },
+
+  "populate_ssh_keys": {
+    "when": "always",
+    "key_name": "id_rsa",
+    "home_directory": "/home/dataiku",
+    "user": "dataiku",
+    "private_key": {"backend_provider": "vault", "vault_path": "/github_keys", "vault_key": "key"},
+    "public_key": {"backend_provider": "vault", "vault_path": "/github_keys", "vault_key": "pub.key"}
+  },
+
+  "global_variables": {
+    "when": "always",
+    "variables": {
+      "default": "default"
+    }
+  },
+
+  "saml": {
+    "when": "always",
+    "enabled": true,
+    "idp_metadata": {"backend_provider": "vault", "vault_path": "/metadata", "vault_key": "nonprod.metadata"},
+    "saml_entity_id": "",
+    "saml_acs_url": ""
+  }
+
+}

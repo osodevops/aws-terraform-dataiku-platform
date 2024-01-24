@@ -1,0 +1,19 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+moto = "*"
+pytest = "*"
+coverage = "*"
+
+[packages]
+boto3 = "*"
+dataiku-api-client = "*"
+pandas = "*"
+psycopg2-binary = "*"
+requests = "*"
+
+[requires]
+python_version = "3.7"

@@ -1,0 +1,15 @@
+[Unit]
+Description=Kick the dataiku ECR login service every 11 hours
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+#Execute job if it missed a run due to machine being off
+Persistent=true
+
+OnBootSec=240
+OnUnitActiveSec=39600
+Unit=dataiku-ecr-login.service
+
+[Install]
+WantedBy=timers.target

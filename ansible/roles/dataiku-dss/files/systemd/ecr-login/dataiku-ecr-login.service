@@ -1,0 +1,11 @@
+[Unit]
+Description=Log the dataiku user in to the ECR service
+Wants=schedule-ecr-login.timer
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/ecr-login.sh
+User=dataiku
+
+[Install]
+WantedBy=default.target

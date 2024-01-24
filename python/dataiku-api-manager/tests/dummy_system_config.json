@@ -1,0 +1,11 @@
+{
+  "aws_region": "eu-west-1",
+  "node_type": "design",
+  "dss_config_file": "dss_config.json",
+  "dss_config_s3_bucket": "mybucket",
+  "dss_config_s3_key": "mykey",
+  "dss_config_s3_bucket_tag": "S3_BUCKET",
+  "dss_config_s3_key_tag": "S3_KEY",
+  "dss_node_type_tag": "DssType",
+
+}

@@ -1,0 +1,15 @@
+[Unit]
+Description=A service that configures dataiku
+After=dataiku.service
+ConditionPathExists=!/var/run/configure-dataiku.lock
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/touch /var/run/configure-dataiku.lock
+WorkingDirectory=/opt/dataiku-configurator
+ExecStart=/bin/python3 /opt/dataiku-configurator/main.py
+StandardOutput=journal
+SyslogIdentifier=configure-dataiku
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,91 @@
+{
+  "variables": {
+    "ami_users": "{{env `AMI_USERS`}}",
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "aws_session_token": "{{env `AWS_SESSION_TOKEN`}}",
+    "build_number": "{{env `BUILD_NUMBER`}}",
+    "build_initiator": "{{env `BUILD_INITIATOR`}}",
+    "packer_build_vpc_id": "{{env `PACKER_BUILD_VPC_ID`}}",
+    "packer_build_subnet_filter": "{{env `PACKER_BUILD_SUBNET_FILTER`}}",
+    "ec2_instance_type": "{{env `EC2_INSTANCE_TYPE`}}",
+    "iam_instance_profile": "{{env `PACKER_INSTANCE_PROFILE`}}",
+    "root_volume_size": "{{env `ROOT_VOLUME_SIZE`}}",
+    "region": "{{env `AWS_REGION`}}",
+    "source_image_account_no": "{{env `SOURCE_IMAGE_ACCOUNT_NO`}}",
+    "source_ami_name": "{{env `SOURCE_IMAGE_NAME`}}",
+    "public_ip_address": "{{env `PUBLIC_IP_ADDRESS`}}",
+    "ssh_interface": "{{env `SSH_INTERFACE`}}",
+    "encrypt_root_volume": "{{env `ENCRYPT_ROOT_VOLUME`}}",
+    "encryption_key_arn": "{{env `ENCRYPTION_KEY_ARN`}}",
+    "dss_node_type": "{{env `NODE_TYPE`}}"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "ami_users": "{{ user `ami_users` }}",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "token": "{{user `aws_session_token`}}",
+      "region": "{{user `region`}}",
+      "instance_type": "{{user `ec2_instance_type`}}",
+      "iam_instance_profile": "{{user `iam_instance_profile`}}",
+      "ami_name": "dss-{{user `dss_node_type`}}-node-{{timestamp}}",
+      "ami_description": "Dataiku {{user `dss_node_type`}} node",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "{{user `source_ami_name`}}",
+          "root-device-type": "ebs",
+          "architecture": "x86_64"
+        },
+        "owners": ["{{user `source_image_account_no`}}"],
+        "most_recent": true
+      },
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/xvda",
+          "volume_size": "{{user `root_volume_size`}}",
+          "volume_type": "gp3",
+          "delete_on_termination": true,
+          "encrypted": "{{ user `encrypt_root_volume` }}",
+          "kms_key_id": "{{ user `encryption_key_arn` }}"
+        }
+      ],
+      "ssh_username": "ec2-user",
+      "ami_virtualization_type": "hvm",
+      "temporary_key_pair_name": "{{user `dss_node_type`}}-dss-packer-{{timestamp}}",
+      "vpc_id": "{{user `packer_build_vpc_id`}}",
+      "subnet_filter": {
+        "filters": {
+          "tag:Name": "{{user `packer_build_subnet_filter`}}"
+        },
+        "most_free": true,
+        "random": true
+      },
+      "associate_public_ip_address": "{{user `public_ip_address`}}",
+      "ssh_interface": "{{user `ssh_interface`}}",
+      "run_tags": {
+        "Name": "dataiku-dss-as-packer",
+        "Application": "Dataiku DSS"
+      },
+      "tags": {
+        "Name": "dss-{{user `dss_node_type`}}-node-{{timestamp}}",
+        "OS_Version": "AmazonLinux2",
+        "ApprovedBy": "{{user `build_initiator`}}",
+        "Version": "{{user `build_number`}}",
+        "Application": "Dataiku DSS Node Image",
+        "Runner": "EC2"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible-local",
+      "playbook_file": "ami/dataiku-dss/ansible/playbooks/dss-{{user `dss_node_type`}}-node.yml",
+      "role_paths": [
+        "ami/dataiku-dss/ansible/roles/dataiku-dss"
+      ]
+    }
+  ]
+}

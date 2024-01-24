@@ -1,0 +1,13 @@
+[Unit]
+Description=Set the cgroup settings on the instance
+Before=dataiku.service
+After=cloud-final.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/set_cgroups.sh
+StandardOutput=journal
+SyslogIdentifier=dataiku-configure-os
+
+[Install]
+WantedBy=default.target

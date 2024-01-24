@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+echo Mock executing dss with $1

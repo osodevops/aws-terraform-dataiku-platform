@@ -1,0 +1,13 @@
+{
+    "ec2_instance_type": "t3.medium",
+    "root_volume_size": "40",
+    "packer_build_vpc_id": "vpc-0494451954b8c9093",
+    "packer_build_subnet_filter": "vpcdev-Public*",
+    "ami_users":"",
+    "iam_instance_profile": "CODEBUILD-PACKER-IAM-PROFILE",
+    "region": "eu-west-2",
+    "source_image_account_no": "109716644331",
+    "public_ip_address": "true",
+    "ssh_interface": "public_ip",
+    "dss_node_type": "automation"
+}

@@ -1,0 +1,468 @@
+---
+
+- name: Set per-host facts
+  set_fact:
+    dss_node_hostname: "{{ansible_fqdn if dss_node_poll_fqdn else ansible_host}}"
+  tags: [setup,dss-setup,dss]
+
+- name: Increase system limits as required by DSS
+  become: true
+  pam_limits:
+    domain: "{{dss_service_user}}"
+    limit_item: "{{item}}"
+    limit_type: "-"
+    value: 65536
+  loop:
+    - nofile
+    - nproc
+  tags: [setup]
+
+- name: Install postgres client
+  become: true
+  yum:
+    name: postgresql
+    state: present
+    lock_timeout: 600
+  tags: [setup]
+
+- name: Install libXScrnSaver, at-spi2-atk and gtk3
+  become: true
+  yum:
+    name:
+      - "libXScrnSaver"
+      - "at-spi2-atk"
+      - "gtk3"
+    state: present
+
+- name: Install additional python packages via yum
+  become: true
+  yum:
+    name:
+      - "@Development tools"
+      - "python3-devel"
+      - "libffi-devel"
+    state: present
+
+- name: Install docker
+  become: true
+  command: "amazon-linux-extras install docker"
+  tags: [setup]
+
+- name: Start and enable docker
+  become: true
+  service:
+    name: docker
+    state: started
+    enabled: true
+  tags: [setup]
+
+- name: Create service user
+  become: true
+  user:
+    name: "{{dss_service_user}}"
+    state: present
+    home: "{{dss_service_user_home}}"
+    groups:
+      - docker
+  tags: [setup, dss-setup]
+
+- name: Create private directories
+  become: true
+  file:
+    path: "{{item}}"
+    state: directory
+    owner: "{{dss_service_user}}"
+    mode: "u=rwx,g=,o="
+  loop:
+    - "{{dss_data_dir_location}}"
+    - "{{dss_install_dir_location}}"
+  tags: [setup, dss-setup]
+
+- name: Install jq via yum
+  become: true
+  yum:
+    name:
+      - "jq"
+    state: present
+
+- name: Download DSS
+  become: true
+  become_user: "{{dss_service_user}}"
+  get_url:
+    url: "https://cdn.downloads.dataiku.com/public/studio/{{dss_version}}/dataiku-dss-{{dss_version}}.tar.gz"
+    dest: "{{dss_install_dir_location}}/dataiku-dss-{{dss_version}}.tar.gz"
+  tags: [setup, dss-setup]
+
+- name: Unarchive DSS
+  become: true
+  become_user: "{{dss_service_user}}"
+  unarchive:
+    src: "{{dss_install_dir_location}}/dataiku-dss-{{dss_version}}.tar.gz"
+    dest: "{{dss_install_dir_location}}"
+    creates: "{{dss_install_dir_location}}/dataiku-dss-{{dss_version}}"
+    remote_src: yes
+  tags: [setup, dss-setup]
+
+- name: Install DSS dependencies
+  become: true
+  shell:
+    cmd: |
+      {{dss_install_dir_location}}/dataiku-dss-{{dss_version}}/scripts/install/install-deps.sh -with-r -yes 2>&1 > /tmp/dss-install-deps.log
+  tags: [setup, dss-setup]
+
+- name: Install this image as a design node
+  become: true
+  become_user: "{{dss_service_user}}"
+  command: "{{dss_install_dir_location}}/dataiku-dss-{{dss_version}}/installer.sh -d {{dss_data_dir_location}} -p {{dss_port}}"
+  args:
+    creates: "{{dss_data_dir_location}}/dss-version.json"
+  tags: [dss]
+  when: dss_node_type == "design"
+
+- name: Install this image as an automation node
+  become: true
+  become_user: "{{dss_service_user}}"
+  command: "{{dss_install_dir_location}}/dataiku-dss-{{dss_version}}/installer.sh -t automation -d {{dss_data_dir_location}} -p {{dss_port}}"
+  args:
+    creates: "{{dss_data_dir_location}}/dss-version.json"
+  tags: [dss]
+  when: dss_node_type == "automation"
+
+- name: Install boot service
+  become: true
+  command: "{{dss_install_dir_location}}/dataiku-dss-{{dss_version}}/scripts/install/install-boot.sh {{dss_data_dir_location}} dataiku"
+  args:
+    creates: "/etc/init.d/dataiku"
+  tags: [dss]
+
+- name: Download hadoop integration
+  get_url:
+    url: "{{dataiku_download_url}}/{{dss_version}}/dataiku-dss-hadoop-standalone-libs-generic-hadoop3-{{dss_version}}.tar.gz"
+    dest: "{{dss_install_dir_location}}/dataiku-dss-hadoop-standalone-libs-generic-hadoop3-{{dss_version}}.tar.gz"
+  become: true
+  become_user: "{{dss_service_user}}"
+
+- name: Load hadoop integration
+  command: "{{dss_data_dir_location}}/bin/dssadmin install-hadoop-integration -standaloneArchive {{dss_install_dir_location}}/dataiku-dss-hadoop-standalone-libs-generic-hadoop3-{{dss_version}}.tar.gz"
+  become: true
+  become_user: "{{dss_service_user}}"
+
+- name: Download spark integration
+  get_url:
+    url: "{{dataiku_download_url}}/{{dss_version}}/dataiku-dss-spark-standalone-{{dss_version}}-{{spark_plugin_version}}-generic-hadoop3.tar.gz"
+    dest: "{{dss_install_dir_location}}/dataiku-dss-spark-standalone-{{dss_version}}-{{spark_plugin_version}}-generic-hadoop3.tar.gz"
+  become: true
+  become_user: "{{dss_service_user}}"
+
+- name: Load spark integration
+  command: "{{dss_data_dir_location}}/bin/dssadmin install-spark-integration -standaloneArchive {{dss_install_dir_location}}/dataiku-dss-spark-standalone-{{dss_version}}-{{spark_plugin_version}}-generic-hadoop3.tar.gz"
+  become: true
+  become_user: "{{dss_service_user}}"
+
+- name: Install R4
+  become: true
+  command: "amazon-linux-extras install R4"
+  tags: [setup]
+
+- name: R integration
+  command: "{{dss_data_dir_location}}/bin/dssadmin install-R-integration"
+  become: true
+  become_user: "{{dss_service_user}}"
+
+- name: Store installed DSS version
+  copy:
+    dest: "{{dss_install_dir_location}}/.installed_version"
+    content: "{{dss_version}}"
+    mode: 0440
+  become_user: "{{dss_service_user}}"
+
+- name: Store installed DSS node type
+  copy:
+    dest: "{{dss_install_dir_location}}/.installed_node"
+    content: "{{dss_node_type}}"
+    mode: 0440
+  become_user: "{{dss_service_user}}"
+
+- name: Download kubectl
+  get_url:
+    url: "https://dl.k8s.io/release/{{kubectl_version}}/bin/linux/amd64/kubectl"
+    dest: "/usr/bin/kubectl"
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: Download eksctl
+  get_url:
+    url:  "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_linux_amd64.tar.gz"
+    dest: "/tmp/eksctl.tar.gz"
+
+- name: Unarchive eksctl
+  become: true
+  unarchive:
+    src: "/tmp/eksctl.tar.gz"
+    dest: "/usr/bin"
+    creates: "/usr/bin/eksctl"
+    remote_src: yes
+  tags: [setup, dss-setup]
+
+- name: Download aws-iam-authenticator
+  get_url:
+    url: "https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator"
+    dest: "/usr/bin/aws-iam-authenticator"
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: Deploy ecr-login script
+  copy:
+    src: "systemd/ecr-login/ecr-login.sh"
+    dest: "/usr/local/bin/ecr-login.sh"
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: Deploy fluentd config
+  copy:
+    src: "fluentd/dataiku.conf"
+    dest: "/etc/td-agent/config.d/dataiku.conf"
+    owner: td-agent
+    group: td-agent
+    mode: 0644
+  become: true
+
+- name: Add td-agent user to dataiku group
+  user:
+    name: 'td-agent'
+    groups: '{{ dss_service_user }}'
+    append: yes
+
+- name: Configure ecr login service
+  copy:
+    src: "systemd/ecr-login/dataiku-ecr-login.service"
+    dest: "/usr/lib/systemd/system/dataiku-ecr-login.service"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Configure ecr login timer
+  copy:
+    src: "systemd/ecr-login/schedule-ecr-login.timer"
+    dest: "/usr/lib/systemd/system/schedule-ecr-login.timer"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Configure the dataiku-ecr-login service
+  systemd:
+    name: dataiku-ecr-login
+    enabled: yes
+    state: stopped
+    daemon_reload: yes
+
+- name: Configure the ecr-login timer
+  systemd:
+    name: schedule-ecr-login.timer
+    enabled: yes
+    state: stopped
+    daemon_reload: yes
+
+- name: Deploy api-manager systemd unit
+  copy:
+    src: "systemd/configure-dataiku.service"
+    dest: "/usr/lib/systemd/system/configure-dataiku.service"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Configure the configure-dataiku service
+  systemd:
+    name: configure-dataiku
+    enabled: yes
+    state: stopped
+    daemon_reload: yes
+
+- name: Deploy the dataiku api manager code
+  copy:
+    src: "dataiku-api-manager/src/"
+    dest: "/opt/dataiku-configurator"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Install pips required to run the api-configurator
+  pip:
+    executable: /bin/pip3
+    name:
+      - urllib3==1.26.15
+      - pandas
+      - psycopg2-binary
+      - boto3
+      - python-dateutil
+      - nose
+      - requests
+  become: true
+
+- name: Install dataiku-api-client pip
+  pip:
+    executable: /bin/pip3
+    name:
+      - "dataiku-api-client=={{dss_api_version}}"
+    extra_args: --no-dependencies
+  become: true
+
+- name: Wget Python3.9
+  become: true
+  become_user: "{{dss_service_user}}"
+  shell:
+    chdir: "{{dss_service_user_home}}"
+    cmd: |
+      /usr/bin/wget https://www.python.org/ftp/python/3.9.17/Python-3.9.17.tgz
+      tar zxvf Python-3.9.17.tgz
+
+- name: Compile Python3.9
+  become: true
+  become_user: "{{dss_service_user}}"
+  shell:
+    chdir: "{{dss_service_user_home}}/Python-3.9.17"
+    cmd: |
+      ./configure --prefix /
+      make
+
+- name: Install Python3.9
+  become: true
+  shell:
+    chdir: "{{dss_service_user_home}}/Python-3.9.17"
+    cmd: |
+      make altinstall
+
+- name: Deploy the configure-os script
+  copy:
+    src: "systemd/cgroups/set_cgroups.sh"
+    dest: "/usr/local/bin/set_cgroups.sh"
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: Deploy configure-os systemd unit
+  copy:
+    src: "systemd/cgroups/dataiku-configure-os.service"
+    dest: "/usr/lib/systemd/system/dataiku-configure-os.service"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Configure the configure-os service
+  systemd:
+    name: dataiku-configure-os
+    enabled: yes
+    state: stopped
+    daemon_reload: yes
+
+- name: Deploy volume-manager systemd unit
+  copy:
+    src: "systemd/volume-manager.service"
+    dest: "/usr/lib/systemd/system/volume-manager.service"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Configure the volume-manager service
+  systemd:
+    name: volume-manager
+    enabled: yes
+    state: stopped
+    daemon_reload: yes
+
+- name: Deploy the dataiku volume manager code
+  copy:
+    src: "volume-manager/src/"
+    dest: "/opt/volume-manager"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Deploy scripts to the user home directory
+  copy:
+    src: "scripts/"
+    dest: "/home/{{dss_service_user}}/scripts"
+    owner: "{{dss_service_user}}"
+    group: "{{dss_service_user}}"
+    mode: 0544
+  become_user: "{{dss_service_user}}"
+
+# Automate GitHub credential management
+- name: GitHub credential management
+  become: true
+  become_user: "{{dss_service_user}}"
+  shell:
+    cmd: |
+      "{{dss_service_user_home}}/scripts/credentials.sh"
+  tags: [setup, github_credentials]
+
+# Install the graphics modelling extension (google chrome)
+- name: Install Node for graphics extension
+  become: true
+  become_user: "{{dss_service_user}}"
+  shell:
+    cmd: |
+      /usr/bin/curl -o /tmp/install-nvm.sh https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh
+      chmod +x /tmp/install-nvm.sh
+      /tmp/install-nvm.sh
+      .  ~/.nvm/nvm.sh
+      nvm install 16.18.0
+
+- name: Install graphics extension
+  become: true
+  become_user: "{{dss_service_user}}"
+  shell:
+    cmd: |
+      .  ~/.nvm/nvm.sh
+      {{dss_data_dir_location}}/bin/dssadmin install-graphics-export  -noDeps
+
+# Start optional services defined in base-ami
+- name: Configure the ops-configurator service
+  systemd:
+    name: ops-configurator
+    enabled: yes
+    state: stopped
+    daemon_reload: yes
+
+- name: Configure the datadog-agent service
+  systemd:
+    name: datadog-agent
+    enabled: yes
+    state: stopped
+    daemon_reload: yes
+
+- name: Configure the td-agent service
+  systemd:
+    name: td-agent
+    enabled: yes
+    state: stopped
+    daemon_reload: yes
+
+- name: Configure the prometheus node-exporter service
+  systemd:
+    name: node_exporter
+    enabled: yes
+    state: stopped
+    daemon_reload: yes
+
+- name: Configure jmx.
+  template:
+    src: jmx_conf.j2
+    dest: /etc/datadog-agent/conf.d/jmx.d/conf.yaml
+    owner: root
+    group: root
+    mode: 0644

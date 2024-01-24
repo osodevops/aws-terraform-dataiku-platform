@@ -1,0 +1,7 @@
+
+# Leave blank line above
+# Dockerfile commands: Lines are appended at the end of the generated dockerfile
+
+RUN echo Appended dockerfile commands
+
+# Leave blank line below
