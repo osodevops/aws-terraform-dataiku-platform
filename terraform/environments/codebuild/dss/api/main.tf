@@ -15,6 +15,6 @@ module "codebuild_api" {
   source_repository_url      = var.source_repository_url
   subnet_name_filter         = var.build_subnet_name_filter
   vpc_name                   = var.vpc_name
-  # github_api_token           = data.aws_ssm_parameter.github_pat  # Uncomment to provide PAT from Parameter Store
+  # github_api_token           = data.aws_ssm_parameter.github_pat.value  # Uncomment to provide PAT from Parameter Store
   # github_api_token           = data.vault_generic_secret.github_pat  # Uncomment to provide PAT from Vault
 }

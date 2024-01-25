@@ -16,7 +16,7 @@ common_tags = {
 packer_instance_type = "t3.medium"
 
 # Name of the project as it will appear in CodeBuild
-project_name = "build-dss-ami-api"
+project_name = "build-dss-ami-automation"
 
 # Volume size for the root partition during the build process
 root_volume_size = "40"
