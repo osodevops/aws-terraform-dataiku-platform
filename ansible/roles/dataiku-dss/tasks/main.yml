@@ -128,6 +128,15 @@
   tags: [dss]
   when: dss_node_type == "automation"
 
+- name: Install this image as an api node
+  become: true
+  become_user: "{{dss_service_user}}"
+  command: "{{dss_install_dir_location}}/dataiku-dss-{{dss_version}}/installer.sh -t api -d {{dss_data_dir_location}} -p {{dss_port}}"
+  args:
+    creates: "{{dss_data_dir_location}}/dss-version.json"
+  tags: [dss]
+  when: dss_node_type == "api"
+
 - name: Install boot service
   become: true
   command: "{{dss_install_dir_location}}/dataiku-dss-{{dss_version}}/scripts/install/install-boot.sh {{dss_data_dir_location}} dataiku"
