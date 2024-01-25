@@ -13,7 +13,7 @@ common_tags = {
 }
 
 # Size and type of the instance used to build the image.
-packer_instance_type = "t3.medium"
+packer_instance_type = "t3.xlarge"
 
 # Name of the project as it will appear in CodeBuild
 project_name = "build-dss-ami-automation"

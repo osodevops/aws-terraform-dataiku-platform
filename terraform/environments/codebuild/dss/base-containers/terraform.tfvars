@@ -16,7 +16,7 @@ common_tags = {
 }
 
 # Size and type of the instance used to build the image.
-packer_instance_type = "t3.medium"
+packer_instance_type = "t3.xlarge"
 
 # Name of the CodeBuild project
 project_name = "build-base-containers"
