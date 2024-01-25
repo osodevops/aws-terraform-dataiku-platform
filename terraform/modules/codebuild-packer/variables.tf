@@ -117,7 +117,7 @@ locals {
 
   ami_pre_build_commands = [
     "echo Installing HashiCorp Packer...",
-    "curl -qL -o packer.zip https://releases.hashicorp.com/packer/1.7.4/packer_1.7.4_linux_amd64.zip && unzip -o packer.zip",
+    "curl -qL -o packer.zip https://releases.hashicorp.com/packer/1.10.0/packer_1.10.0_linux_amd64.zip && unzip -o packer.zip",
     "echo Create build number from git hash",
     "if [[ -z $BUILD_NUMBER ]]; then BUILD_NUMBER=$(git rev-parse --short HEAD); fi",
     "BUILD_INITIATOR=$CODEBUILD_INITIATOR",
