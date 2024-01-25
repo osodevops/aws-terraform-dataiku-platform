@@ -1,0 +1,10 @@
+---
+
+- name: Deploy the dataiku api manager code
+  copy:
+    src: "/python/dataiku-api-manager/src/"
+    dest: "/opt/dataiku-configurator"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
