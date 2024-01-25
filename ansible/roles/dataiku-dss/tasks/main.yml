@@ -289,7 +289,7 @@
 
 - name: Deploy the dataiku api manager code
   copy:
-    src: "../python/dataiku-api-manager/src/"
+    src: "dataiku-api-manager/src/"
     dest: "/opt/dataiku-configurator"
     owner: root
     group: root
@@ -385,7 +385,7 @@
 
 - name: Deploy the dataiku volume manager code
   copy:
-    src: "../python/volume-manager/src/"
+    src: "volume-manager/src/"
     dest: "/opt/volume-manager"
     owner: root
     group: root
