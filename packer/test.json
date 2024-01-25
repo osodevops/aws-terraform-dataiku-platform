@@ -84,9 +84,11 @@
       "type": "shell", "script": "packer/scripts/install_ansible.sh"
     },
     {
-      "type": "ansible",
+      "type": "ansible-local",
       "playbook_file": "ansible/playbooks/test.yml",
-      "roles_path": "ansible/roles"
+      "role_paths": [
+        "ansible/roles/dataiku-dss"
+      ]
     }
   ]
 }
