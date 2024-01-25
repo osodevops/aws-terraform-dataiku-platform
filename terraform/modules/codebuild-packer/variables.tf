@@ -28,9 +28,14 @@ variable "encrypt_ami" {
 }
 
 variable "environment_build_image" {
+  description = "Docker image used by CodeBuild"
   type        = string
   default     = "aws/codebuild/standard:1.0"
-  description = "Docker image used by CodeBuild"
+}
+
+variable "github_api_token" {
+  description = "Personal Access Token used to connect CodeBuild projects to Github repositories"
+  type        = string
 }
 
 variable "instance_type" {
