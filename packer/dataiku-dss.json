@@ -81,19 +81,19 @@
   ],
   "provisioners": [
     {
-      "type": "shell", "script": "ami/base-image/packer/scripts/package_update.sh"
+      "type": "shell", "script": "packer/scripts/package_update.sh"
     },
     {
-      "type": "shell", "script": "ami/base-image/packer/scripts/install_python3.sh"
+      "type": "shell", "script": "packer/scripts/install_python3.sh"
     },
     {
-      "type": "shell", "script": "ami/base-image/packer/scripts/install_ansible.sh"
+      "type": "shell", "script": "packer/scripts/install_ansible.sh"
     },
     {
-      "type": "shell", "script": "ami/base-image/packer/scripts/install_awscli.sh"
+      "type": "shell", "script": "packer/scripts/install_awscli.sh"
     },
     {
-      "type": "shell", "script": "ami/base-image/packer/scripts/install_aws_ssm.sh"
+      "type": "shell", "script": "packer/scripts/install_aws_ssm.sh"
     },
     {
       "type": "ansible-local",
