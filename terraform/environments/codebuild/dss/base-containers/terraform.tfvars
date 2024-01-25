@@ -2,7 +2,7 @@
 aws_region = "eu-west-2"
 
 # Name of the VPC subnets to use in building
-build_subnet_name_filter = "Private*"
+build_subnet_name_filter = "*Private*"
 
 # Maximum run-time of the build job
 build_timeout = 180

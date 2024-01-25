@@ -2,7 +2,7 @@
 aws_region = "eu-west-2"
 
 # Name of the VPC subnets to use in building
-build_subnet_name_filter = "Private*"
+build_subnet_name_filter = "*Private*"
 
 # Tags to add to all Terraform resources that support them
 common_tags = {

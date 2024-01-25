@@ -5,11 +5,6 @@ provider "aws" {
   }
 }
 
-#provider "github" {
-#  owner = var.github_owner
-#  token = data.aws_ssm_parameter.github_oauth_token.value
-#}
-
 #provider "vault" {
 #  address = var.vault_address
 #  auth_login {
