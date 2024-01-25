@@ -233,15 +233,6 @@
     mode: 0755
   become: true
 
-- name: Deploy fluentd config
-  copy:
-    src: "fluentd/dataiku.conf"
-    dest: "/etc/td-agent/config.d/dataiku.conf"
-    owner: td-agent
-    group: td-agent
-    mode: 0644
-  become: true
-
 - name: Add td-agent user to dataiku group
   user:
     name: 'td-agent'
