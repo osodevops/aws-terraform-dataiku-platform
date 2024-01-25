@@ -20,23 +20,6 @@ variable "common_tags" {
   type        = map(string)
 }
 
-variable "container_packer_instance_type" {
-  description = "Instance type used by packer to build"
-  type        = string
-  default     = "m5a.2xlarge"
-}
-
-variable "container_source_image_account_no" {
-  description = "Account number owning the source image for the packer build"
-  type        = string
-  default     = "amazon"
-}
-
-variable "container_source_repository_url" {
-  description = "The source repository URL of OSO DevOps Tableau module."
-  type        = string
-}
-
 variable "packer_instance_type" {
   description = "Instance type used by packer to build"
   type        = string
@@ -92,8 +75,5 @@ variable "vault_skip_tls" {
 }
 
 locals {
-  container_additional_build_variables = { "ECR_ADDRESS" : "${local.ecr_registry_id_container_exec}/${var.deployment != "" ? var.deployment : var.environment}" }
-  registry_prefix                      = var.deployment != "" ? var.deployment : var.environment
-
-  ecr_registry_id_container_exec = trimsuffix(data.aws_ecr_repository.dataiku_common_container_exec.repository_url, "/${data.aws_ecr_repository.dataiku_common_container_exec.name}")
+  container_additional_build_variables = { "ECR_ADDRESS" : aws_ecr_repository.dataiku_container_exec.name }
 }
