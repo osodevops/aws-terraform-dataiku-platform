@@ -15,19 +15,19 @@ common_tags = {
 # Size and type of the instance used to build the image.
 packer_instance_type = "t3.medium"
 
-# Name of the CodeBuild project
-project_name = "build-dss-ami-design"
+# Name of the project as it will appear in CodeBuild
+project_name = "build-dss-ami-api"
 
-# Volume size of the build image
+# Volume size for the root partition during the build process
 root_volume_size = "40"
 
-# Additional AWS accounts to share the AMI to
+# Additional AWS account numbers to share the final AMI to
 shared_ami_users = ""
 
 # Owning account of the source image
 source_image_account_no = "amazon"
 
-# Source image to base the DSS node AMI on
+# Name of the source image to base the DSS build on
 source_image_name = "amzn2-ami-hvm-*.*.*.*-*-gp2"
 
 # Repository used to get the ansible and packer build code

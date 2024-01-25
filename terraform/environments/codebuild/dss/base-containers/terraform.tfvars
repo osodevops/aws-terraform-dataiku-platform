@@ -21,8 +21,8 @@ packer_instance_type = "t3.medium"
 # Name of the CodeBuild project
 project_name = "build-base-containers"
 
-# Owning account of the source image
-source_image_account_no = "amazon"
+# Owning account of the source image - The account where the DSS Design AMI is available from
+source_image_account_no = "YOUR-AWS-ACCOUNT-NUMBER-HERE"
 
 # Repository used to get the ansible and packer build code
 source_repository_url = "https://github.com/osodevops/terraform-aws-dataiku-platform"
