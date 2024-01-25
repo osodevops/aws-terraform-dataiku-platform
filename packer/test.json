@@ -81,6 +81,9 @@
   ],
   "provisioners": [
     {
+      "type": "shell", "script": "packer/scripts/install_ansible.sh"
+    },
+    {
       "type": "ansible",
       "playbook_file": "ansible/playbooks/test.yml",
       "roles_path": "ansible/roles"
