@@ -75,5 +75,5 @@ variable "vault_skip_tls" {
 }
 
 locals {
-  container_additional_build_variables = { "ECR_ADDRESS" : aws_ecr_repository.dataiku_container_exec.name }
+  container_additional_build_variables = { "ECR_ADDRESS" : trimsuffix(aws_ecr_repository.dataiku_container_exec.repository_url, "/${aws_ecr_repository.dataiku_container_exec.name}") }
 }

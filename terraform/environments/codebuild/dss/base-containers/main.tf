@@ -4,13 +4,12 @@ module "codebuild_base_containers" {
   additional_build_variables = local.container_additional_build_variables
   ami_post_build_commands    = ["echo Container build complete"]
   build_timeout              = var.build_timeout
-  common_tags                = var.common_tags
-  instance_type              = var.container_packer_instance_type
+  instance_type              = var.packer_instance_type
   packer_file_location       = "packer/base-containers.json"
   project_name               = var.project_name
   region                     = var.aws_region
-  source_image_account_no    = var.container_source_image_account_no
-  source_repository_url      = var.container_source_repository_url
+  source_image_account_no    = var.source_image_account_no
+  source_repository_url      = var.source_repository_url
   subnet_name_filter         = var.build_subnet_name_filter
   vpc_name                   = var.vpc_name
   # github_api_token           = data.aws_ssm_parameter.github_pat.value  # Uncomment to provide PAT from Parameter Store
