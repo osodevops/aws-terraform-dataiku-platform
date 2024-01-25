@@ -70,22 +70,22 @@
   "provisioners": [
     {
       "type": "file",
-      "source": "containers/container-exec",
+      "source": "packer/containers/container-exec",
       "destination": "/tmp/container-exec"
     },
     {
       "type": "file",
-      "source": "containers/api-deployer",
+      "source": "packer/containers/api-deployer",
       "destination": "/tmp/api-deployer"
     },
     {
       "type": "file",
-      "source": "containers/spark",
+      "source": "packer/containers/spark",
       "destination": "/tmp/spark"
     },
     {
       "type": "file",
-      "source": "containers/packer/scripts/build-base-containers.sh",
+      "source": "packer/scripts/build-base-containers.sh",
       "destination": "/var/tmp/build-base-containers.sh"
     },
     {

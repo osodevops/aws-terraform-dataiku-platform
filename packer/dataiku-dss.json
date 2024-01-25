@@ -82,9 +82,9 @@
   "provisioners": [
     {
       "type": "ansible-local",
-      "playbook_file": "ami/dataiku-dss/ansible/playbooks/dss-{{user `dss_node_type`}}-node.yml",
+      "playbook_file": "ansible/playbooks/dss-{{user `dss_node_type`}}-node.yml",
       "role_paths": [
-        "ami/dataiku-dss/ansible/roles/dataiku-dss"
+        "ansible/roles/dataiku-dss"
       ]
     }
   ]
