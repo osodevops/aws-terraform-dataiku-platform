@@ -117,16 +117,19 @@ locals {
 
   ami_pre_build_commands = [
     "echo Installing HashiCorp Packer...",
-    "curl -qL -o packer.zip https://releases.hashicorp.com/packer/1.10.0/packer_1.10.0_linux_amd64.zip && unzip -o packer.zip",
+    "curl -qL -o packer.zip https://releases.hashicorp.com/packer/1.10.0/packer_1.10.0_linux_amd64.zip && unzip -d /tmp -o packer.zip",
     "echo Create build number from git hash",
     "if [[ -z $BUILD_NUMBER ]]; then BUILD_NUMBER=$(git rev-parse --short HEAD); fi",
     "BUILD_INITIATOR=$CODEBUILD_INITIATOR",
+    "echo Installing packer plugins...",
+    "/tmp/packer plugins install github.com/hashicorp/amazon",
+    "/tmp/packer plugins install github.com/hashicorp/ansible",
     "echo Validating packer template to build...",
-    "./packer validate ${var.packer_file_location}",
+    "/tmp/packer validate ${var.packer_file_location}",
   ]
 
   ami_build_commands = [
-    "./packer build -color=false ${var.packer_file_location} | tee build.log",
+    "/tmp/packer build -color=false ${var.packer_file_location} | tee build.log",
   ]
 
   ami_post_build_commands = length(var.ami_post_build_commands) != 0 ? var.ami_post_build_commands : [
