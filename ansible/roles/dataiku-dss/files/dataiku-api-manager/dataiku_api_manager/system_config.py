@@ -5,7 +5,6 @@ import os
 import requests
 
 from aws_helper import AwsHelper, aws_provider
-from src import wrappers
 
 logger = logging.getLogger(__name__)
 
@@ -43,12 +42,16 @@ class SystemConfig:
         self.tags = {}
 
     @aws_provider
-    def _get_instance_tag(self, search_tag, default):
+    def _get_instance_tag(self, search_tag, default=""):
         if not self.tags:
             if not self.instance_id:
                 self.instance_id = requests.get('http://169.254.169.254/latest/meta-data/instance-id').text
             self.tags = self.aws_handler.get_instance_tags(self.instance_id)
-        return self.tags.get(search_tag, default)
+        for tag in self.tags:
+            if tag['Key'] == search_tag:
+                return tag["Value"]
+        return default
+
 
     @aws_provider
     def _get_bucket_data(self):
@@ -74,15 +77,15 @@ class SystemConfig:
                 return json.loads(f.read())
 
         if self.dss_config_s3_key_tag:
-            self.dss_config_s3_key = self._get_instance_tag(tag=self.dss_config_s3_key_tag,
+            self.dss_config_s3_key = self._get_instance_tag(search_tag=self.dss_config_s3_key_tag,
                                                             default=os.getenv("S3_CONFIG_KEY"))
 
         if self.dss_config_s3_bucket_tag:
-            self.dss_config_s3_bucket = self._get_instance_tag(tag=self.dss_config_s3_bucket_tag,
+            self.dss_config_s3_bucket = self._get_instance_tag(search_tag=self.dss_config_s3_bucket_tag,
                                                                default=os.getenv("S3_CONFIG_BUCKET"))
 
         if self.dss_node_type_tag:
-            self.node_type = self._get_instance_tag(tag=self.dss_node_type_tag,
+            self.node_type = self._get_instance_tag(search_tag=self.dss_node_type_tag,
                                                     default=os.getenv("DSSNODE_TYPE"))
 
         if self.dss_config_s3_key and self.dss_config_s3_bucket:

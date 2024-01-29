@@ -13,11 +13,11 @@ class Config(JsonParser):
         'prod_alb_automation_dns_name', 'deployment', 'set_user_profile', 'set_admin_password', 'update_license',
         'install_ini_settings', 'configure_rds', 'plugins', 'eks_cluster', 'containerized_execution',
         'cgroups', 's3_connections', 'api_infrastructure', 'project_infrastructures', 'populate_ssh_keys',
-        'global_variables', 'saml', "dss_auth"
+        'global_variables', 'saml', 'dss'
     ]
 
     def get_dss_auth_settings(self):
-        data = self.data["dss_auth"]
+        data = self.data["dss"]
         deployed_path = data['deployment_path']
         user = data['admin_user']
 
@@ -40,10 +40,10 @@ class Config(JsonParser):
 
     def initialize_backend_settings(self):
         self.vault_settings = {
-            "vault_role": self.data['dss']['vault_role'],
-            "vault_endpoint":  self.data['dss']['vault_endpoint'],
-            "vault_skip_tls": self.data['dss']['vault_skip_tls'],
-            "vault_path": self.data['dss']['vault_path'],
-            "vault_os_nonce_path": self.data['dss']['vault_os_nonce_path'],
-            "vault_mock": self.data['dss']['vault_mock']
+            "vault_role": self.data['dss'].get('vault_role'),
+            "vault_endpoint":  self.data['dss'].get('vault_endpoint'),
+            "vault_skip_tls": self.data['dss'].get('vault_skip_tls'),
+            "vault_path": self.data['dss'].get('vault_path'),
+            "vault_os_nonce_path": self.data['dss'].get('vault_os_nonce_path'),
+            "vault_mock": self.data['dss'].get('vault_mock')
         }

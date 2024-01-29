@@ -2,7 +2,7 @@ import logging
 
 import dataikuapi
 
-from src.dataiku_controller import DataikuController
+from dataiku_controller import DataikuController
 
 logger = logging.getLogger(__name__)
 
