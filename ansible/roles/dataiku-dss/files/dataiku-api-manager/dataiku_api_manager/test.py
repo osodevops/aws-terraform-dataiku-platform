@@ -2,8 +2,8 @@ import logging
 import sys
 
 from config import Config
-from src.configurator import Configurator
-from src.system_config import SystemConfig
+from configurator import Configurator
+from system_config import SystemConfig
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
