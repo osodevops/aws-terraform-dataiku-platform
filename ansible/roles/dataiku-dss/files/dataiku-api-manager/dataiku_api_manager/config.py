@@ -43,7 +43,9 @@ class Config(JsonParser):
             "vault_role": self.data['dss'].get('vault_role'),
             "vault_endpoint":  self.data['dss'].get('vault_endpoint'),
             "vault_skip_tls": self.data['dss'].get('vault_skip_tls'),
-            "vault_path": self.data['dss'].get('vault_path'),
+            "vault_path": self.data['dss'].get('vault_auth_path'),
             "vault_os_nonce_path": self.data['dss'].get('vault_os_nonce_path'),
-            "vault_mock": self.data['dss'].get('vault_mock')
+            "vault_mock_endpoint": self.data['dss'].get('vault_mock_endpoint'),
+            "vault_auth_method": self.data['dss'].get('vault_auth_method'),
+            "vault_auth_token": self.data['dss'].get('vault_auth_token')
         }
