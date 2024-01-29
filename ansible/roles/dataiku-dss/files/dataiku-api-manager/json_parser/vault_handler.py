@@ -30,37 +30,38 @@ class Vault:
     method: str
     token: str
 
-    def __init__(self, role, endpoint, skip_tls, path, nonce_path, mock=False, method="aws", token=""):
+    def __init__(self, role, endpoint, skip_tls, auth_path, os_nonce_path, mock_endpoint=False, auth_method="aws",
+                 auth_token=""):
         self.role = role
         self.endpoint = endpoint
         self.skip_tls = ""
         if skip_tls:
             self.skip_tls = "-tls-skip-verify"
-        self.path = path
-        self.nonce_path = nonce_path
-        self.mock = mock
+        self.auth_path = auth_path
+        self.os_nonce_path = os_nonce_path
+        self.mock_endpoint = mock_endpoint
         self.mock_values = {}
-        self.method = method
-        self.token = token
+        self.auth_method = auth_method
+        self.auth_token = auth_token
 
     def load_nonce(self):
         self.nonce = ""
-        if exists(self.nonce_path):
-            with open(self.nonce_path, 'r') as f:
+        if exists(self.os_nonce_path):
+            with open(self.os_nonce_path, 'r') as f:
                 self.nonce = re.sub("\n", "", f.read())
 
     def save_nonce(self):
-        with open(self.nonce_path, 'w') as f:
+        with open(self.os_nonce_path, 'w') as f:
             f.write(self.nonce)
-        os.chmod(self.nonce_path, 0o440)
-        os.chown(self.nonce_path, 0, grp.getgrnam('dataiku').gr_gid)
+        os.chmod(self.os_nonce_path, 0o440)
+        os.chown(self.os_nonce_path, 0, grp.getgrnam('dataiku').gr_gid)
 
     def login(self):
-        if self.mock:
+        if self.mock_endpoint:
             return
 
-        token = self.token
-        if self.method == "aws":
+        token = self.auth_token
+        if self.auth_method == "aws":
             self.load_nonce()
             nonce = ""
             if self.nonce:
@@ -91,13 +92,13 @@ class Vault:
         except subprocess.CalledProcessError as err:
             raise VaultException(f"Error: Could not login to vault", err)
 
-    def get_kv(self, path):
-        if self.mock:
-            return self.mock_values[path]
+    def get_kv(self, k_path):
+        if self.mock_endpoint:
+            return self.mock_values[k_path]
 
         try:
             raw_output = subprocess.run(
-                f"vault kv get -address={self.endpoint} {self.skip_tls} -format=json {path}", shell=True,
+                f"vault kv get -address={self.endpoint} {self.skip_tls} -format=json {k_path}", shell=True,
                 check=True, capture_output=True)
         except subprocess.CalledProcessError as err:
             raise VaultException(f"Error: Could not login to vault", err)
