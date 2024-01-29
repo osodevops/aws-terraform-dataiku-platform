@@ -24,7 +24,7 @@ def main():
     )
 
     system_config.load_system_config()
-    dss_config = Config(aws_region=system_config.aws_region)
+    dss_config = Config(aws_region=system_config.aws_settings["aws_region"])
     dss_config.load_data(system_config.get_config_data())
     dss_config.initialize_backend_settings()
 

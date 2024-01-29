@@ -287,10 +287,37 @@
     state: stopped
     daemon_reload: yes
 
+- name: Create configuration python directory
+  become: true
+  file:
+    path: "/opt/dataiku-python"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
 - name: Deploy the dataiku api manager code
   copy:
-    src: "dataiku-api-manager/src/"
-    dest: "/opt/dataiku-configurator"
+    src: "dataiku-api-manager/dataiku-api-manager"
+    dest: "/opt/dataiku-python/dataiku-api-manager"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Deploy the dataiku json parser
+  copy:
+    src: "dataiku-api-manager/json-parser/"
+    dest: "/opt/dataiku-python/json-parser"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Deploy the dataiku aws helper
+  copy:
+    src: "dataiku-api-manager/aws-helper/"
+    dest: "/opt/dataiku-python/aws-helper"
     owner: root
     group: root
     mode: 0644
@@ -361,7 +388,7 @@
 - name: Deploy the dataiku volume manager code
   copy:
     src: "volume-manager/src/"
-    dest: "/opt/volume-manager"
+    dest: "/opt/dataiku-python/volume-manager"
     owner: root
     group: root
     mode: 0644

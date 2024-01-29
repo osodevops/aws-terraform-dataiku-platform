@@ -2,7 +2,7 @@ import logging
 
 import dataikuapi
 
-from aws_helper.helper import AwsHelper
+from aws_helper import AwsHelper, aws_provider
 from src import wrappers
 from src.dss_cluster import Cluster
 from src.dss_code_env import CodeEnv
@@ -28,14 +28,14 @@ class Configurator:
     apideployer_client: [dataikuapi.dss.apideployer.DSSAPIDeployer, None]
     dss_service_handler: [DataikuController, None]
     dss_auth_settings: dict
-    aws_region: str
+    aws_settings: dict
     aws_client: AwsHelper
     config_generator: ConfigGenerator
     dss_service_settings: dict
 
     def __init__(self, dss_auth_settings={}, aws_region="", dss_service_settings={}) -> None:
         self.dss_auth_settings = dss_auth_settings
-        self.aws_region = aws_region
+        self.aws_settings = {"aws_region": aws_region}
         self.config_generator = ConfigGenerator()
         self.dss_service_settings = dss_service_settings
 
@@ -269,13 +269,13 @@ class Configurator:
         )
 
     # todo: fix this up
-    @wrappers.aws_provider
+    @aws_provider
     @wrappers.dss_service_handler
     @wrappers.dss_client
     def action_store_admin_api_token(self):
         ssm_config = {
             'param': "something",
-            'value': "something",
+            'value': infra.get('admin_key'),
             'type': "SecureString",
             'overwrite': True
         }

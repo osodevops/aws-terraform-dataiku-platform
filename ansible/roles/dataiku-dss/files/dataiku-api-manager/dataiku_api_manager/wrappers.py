@@ -2,7 +2,6 @@ import logging
 
 import dataikuapi
 
-from aws_helper.helper import AwsHelper
 from src.dataiku_controller import DataikuController
 
 logger = logging.getLogger(__name__)

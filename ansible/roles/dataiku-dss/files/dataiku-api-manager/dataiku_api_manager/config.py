@@ -2,15 +2,12 @@ import json
 import logging
 import subprocess
 
-from json_parser.parser import JsonParser
+from json_parser import JsonParser
 
 logger = logging.getLogger(__name__)
 
 
 class Config(JsonParser):
-    admin_password = dynamic_config.get_vault_value('vault_admin_password', 'password')
-    automation_admin_key = dynamic_config.get('automation_admin_key')
-
     valid_keys = [
         'auth_token_source', 'endpoint_url', 'installation_directory', 'pre_prod_alb_automation_dns_name',
         'prod_alb_automation_dns_name', 'deployment', 'set_user_profile', 'set_admin_password', 'update_license',
