@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 def string_to_bool(data):
-    if data in ['False', 'false', 'F', 'f', False]:
+    if data in ['False', 'false', 'F', 'f', False, None]:
         return False
     return True
 

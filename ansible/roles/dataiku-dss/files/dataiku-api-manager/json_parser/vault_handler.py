@@ -38,7 +38,6 @@ class Vault:
             self.skip_tls = "-tls-skip-verify"
         self.path = path
         self.nonce_path = nonce_path
-        self.load_nonce()
         self.mock = mock
         self.mock_values = {}
         self.method = method
@@ -62,6 +61,7 @@ class Vault:
 
         token = self.token
         if self.method == "aws":
+            self.load_nonce()
             nonce = ""
             if self.nonce:
                 nonce = f"nonce={self.nonce}"
