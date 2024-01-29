@@ -1,7 +1,7 @@
 aws_region  = "MY-AWS-REGION"
 common_tags = {
   Application = "Dataiku-DSS"
-  Tool        = "Terraform"
+  Tooling        = "Terraform"
 }
 
 # This wrapper can be deployed for a whole VPC, or for sub-sections of your environment. Tailor to suit.
