@@ -1,20 +1,25 @@
+from dataiku_api_manager.exceptions import ConfiguratorException
 
 
 class User:
     dss_client: object
     settings: dict
     settings_raw: dict
-    user: object
+    user: [object, None]
 
     def __init__(self, dss_client, user):
         self.dss_client = dss_client
-
-        self.user = self.get_user(user)
-        self.settings = self.user.get_settings()
-        self.settings_raw = self.settings.get_raw()
+        self.user = None
+        if user:
+            self.get_user(user)
 
     def get_user(self, user):
-        return self.dss_client.get_user(user)
+        try:
+            self.user = self.dss_client.get_user(user)
+            self.settings = self.user.get_settings()
+            self.settings_raw = self.settings.get_raw()
+        except Exception as e:
+            raise ConfiguratorException("Could not retrieve user details from DSS endpoint", e) from None
     
     def set_profile(self, profile):
         if self.profile_saved(profile):
