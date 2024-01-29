@@ -27,8 +27,10 @@ class Vault:
     nonce_path: str
     mock: bool
     mock_values: dict
+    method: str
+    token: str
 
-    def __init__(self, role, endpoint, skip_tls, path, nonce_path, mock=False):
+    def __init__(self, role, endpoint, skip_tls, path, nonce_path, mock=False, method="aws", token=""):
         self.role = role
         self.endpoint = endpoint
         self.skip_tls = ""
@@ -39,6 +41,8 @@ class Vault:
         self.load_nonce()
         self.mock = mock
         self.mock_values = {}
+        self.method = method
+        self.token = token
 
     def load_nonce(self):
         self.nonce = ""
@@ -56,27 +60,29 @@ class Vault:
         if self.mock:
             return
 
-        nonce = ""
-        if self.nonce:
-            nonce = f"nonce={self.nonce}"
+        token = self.token
+        if self.method == "aws":
+            nonce = ""
+            if self.nonce:
+                nonce = f"nonce={self.nonce}"
 
-        pkcs7 = requests.get("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7").text
-        pkcs7 = re.sub("\n", "", pkcs7)
+            pkcs7 = requests.get("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7").text
+            pkcs7 = re.sub("\n", "", pkcs7)
 
-        try:
-            raw_output = subprocess.run(
-                f"vault write -address={self.endpoint} {self.skip_tls} auth/{self.path}/login method=aws "
-                f"path={self.path} role={self.role} pkcs7={pkcs7} {nonce} -format=json", shell=True,
-                check=True, capture_output=True)
-        except subprocess.CalledProcessError as err:
-            raise VaultException(f"Error: Could not login to vault", err)
-        output = json.loads(raw_output.stdout)
+            try:
+                raw_output = subprocess.run(
+                    f"vault write -address={self.endpoint} {self.skip_tls} auth/{self.path}/login method=aws "
+                    f"path={self.path} role={self.role} pkcs7={pkcs7} {nonce} -format=json", shell=True,
+                    check=True, capture_output=True)
+            except subprocess.CalledProcessError as err:
+                raise VaultException(f"Error: Could not login to vault", err)
+            output = json.loads(raw_output.stdout)
 
-        if output['auth']['metadata'].get('nonce'):
-            self.nonce = output['auth']['metadata'].get('nonce')
-            self.save_nonce()
+            if output['auth']['metadata'].get('nonce'):
+                self.nonce = output['auth']['metadata'].get('nonce')
+                self.save_nonce()
 
-        token = output['auth']['client_token']
+            token = output['auth']['client_token']
 
         try:
             raw_output = subprocess.run(

@@ -46,6 +46,9 @@ class JsonParser:
         if data:
             self.data = data
 
+        self.vault_handler = None
+        self.aws_handler = None
+
     def load_data(self, data):
         self.data = data
 

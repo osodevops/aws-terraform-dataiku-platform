@@ -21,7 +21,8 @@ def vault_provider(func):
                 skip_tls=string_to_bool(self.vault_settings.get('vault_skip_tls')),
                 path=self.vault_settings.get('vault_path'),
                 nonce_path=self.vault_settings.get('vault_nonce_path'),
-                mock=string_to_bool(self.vault_settings.get('vault_mock_endpoint'))
+                mock=string_to_bool(self.vault_settings.get('vault_mock_endpoint')),
+                method=self.vault_settings.get('vault_auth_method')
             )
             self.vault_handler.login()
         return func(self, *args, **kwargs)
