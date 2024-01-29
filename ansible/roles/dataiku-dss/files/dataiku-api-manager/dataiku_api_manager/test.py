@@ -43,7 +43,7 @@ def main():
 
     configurator = Configurator(
         dss_auth_settings=dss_auth_settings,
-        aws_region=system_config.aws_region,
+        aws_region=system_config.aws_settings["aws_region"],
         dss_service_settings=dss_service_settings
     )
 

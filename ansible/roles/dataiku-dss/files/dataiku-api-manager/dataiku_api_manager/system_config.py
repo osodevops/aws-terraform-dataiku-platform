@@ -4,7 +4,7 @@ import os
 
 import requests
 
-from aws_helper import AwsHelper
+from aws_helper import AwsHelper, aws_provider
 from src import wrappers
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ class SystemConfig:
         self.instance_id = ""
         self.tags = {}
 
-    @wrappers.aws_provider
+    @aws_provider
     def _get_instance_tag(self, search_tag, default):
         if not self.tags:
             if not self.instance_id:
@@ -50,7 +50,7 @@ class SystemConfig:
             self.tags = self.aws_handler.get_instance_tags(self.instance_id)
         return self.tags.get(search_tag, default)
 
-    @wrappers.aws_provider
+    @aws_provider
     def _get_bucket_data(self):
         return self.aws_handler.get_file_from_s3(
             {'bucket_name': self.dss_config_s3_bucket, 'key': self.dss_config_s3_key})
