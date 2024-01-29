@@ -1,0 +1,46 @@
+module "dss_design" {
+  source                        = "../../../../modules/dss-node"
+  additional_security_groups    = var.additional_security_groups
+  ami_name_filter               = var.ami_name_filter
+  ami_owner_account             = var.ami_owner_account
+  asg_desired_capacity          = var.asg_desired_capacity
+  api_dynamic_settings_json     = local.api_dynamic_settings_design
+  aws_region                    = var.aws_region
+  cloudwatch_alarm_topic_name   = var.cloudwatch_alarm_sns_topic_name
+  dss_s3_config_bucket          = var.dss_s3_config_bucket
+  dss_s3_config_key             = var.dss_s3_config_key
+  dss_node_type                 = var.dss_node_type
+  dss_service_port              = var.dss_service_port
+  dss_service_protocol          = var.dss_service_protocol
+  environment                   = var.environment
+  instance_allowed_ips          = var.instance_allowed_ips
+  instance_type                 = var.instance_type
+  lb_allowed_ips                = var.lb_allowed_ips
+  lb_allow_security_groups      = var.lb_allow_security_groups
+  lb_certificate_arn            = var.lb_certificate_arn
+  lb_enable_load_balancer       = var.lb_enable_load_balancer
+  lb_enable_deletion_protection = var.lb_enable_deletion_protection
+  lb_health_check_path          = var.lb_health_check_path
+  lb_health_check_port          = var.lb_health_check_port
+  lb_health_check_protocol      = var.lb_health_check_protocol
+  lb_health_check_response_code = var.lb_health_check_response_code
+  lb_https_port                 = var.lb_https_port
+  lb_internal                   = var.lb_internal
+  lb_logs_s3_enabled            = var.lb_logs_s3_enabled
+  lb_log_s3_bucket_name         = var.lb_log_s3_bucket_name
+  private_subnet_name_filter    = var.private_subnet_name_filter
+  public_subnet_name_filter     = var.public_subnet_name_filter
+  r53_enable_private_zone       = var.r53_enable_private_zone
+  r53_enable_public_zone        = var.r53_enable_public_zone
+  r53_zone_name                 = var.r53_zone_name
+  root_volume_size              = var.root_volume_size
+  s3_allow_instance_bucket      = var.s3_allow_instance_bucket
+  s3_create_instance_bucket     = var.s3_create_instance_bucket
+  s3_instance_bucket_name       = var.s3_instance_bucket_name
+  s3_session_logging_bucket_arn = var.s3_session_logging_bucket_arn
+  ssh_key_name                  = var.ssh_key_name
+
+  volume_dynamic_settings_json = local.volume_dynamic_settings_json
+  vpc_name                     = var.vpc_name
+}
+
