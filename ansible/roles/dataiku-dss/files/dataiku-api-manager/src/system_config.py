@@ -58,14 +58,15 @@ class SystemConfig:
             with open(self.system_json_file, 'r') as f:
                 data = json.loads(f.read())
             for key, value in data.items():
-                if key in ['aws_region', 'dss_config_file', 'dss_config_s3_bucket', 'dss_config_s3_key',
-                           'dss_config_s3_bucket_tag', 'dss_config_s3_key_tag']:
+                if key in ['aws_region', 'node_type', 'dss_config_file', 'dss_config_s3_bucket', 'dss_config_s3_key',
+                           'dss_config_s3_bucket_tag', 'dss_config_s3_key_tag', 'dss_node_type_tag']:
                     if not getattr(self, key):
                         setattr(self, key, value)
                 else:
                     logger.critical(f"System config file contained invalid key: {key}")
 
     def get_config_data(self):
+        # Tag settings will override any value already given for a specific item
         if self.dss_config_file:
             with open(self.dss_config_file, 'r') as f:
                 return json.loads(f.read())
