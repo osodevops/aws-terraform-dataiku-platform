@@ -38,6 +38,9 @@ class Configurator:
         self.aws_settings = {"aws_region": aws_region}
         self.config_generator = ConfigGenerator()
         self.dss_service_settings = dss_service_settings
+        self.dss_client = None
+        self.apideployer_client = None
+        self.dss_service_handler = None
 
     @wrappers.dss_client
     def action_set_admin_password(self, config):
@@ -272,14 +275,14 @@ class Configurator:
     @aws_provider
     @wrappers.dss_service_handler
     @wrappers.dss_client
-    def action_store_admin_api_token(self):
+    def action_store_admin_api_token(self, parameter):
         ssm_config = {
-            'param': "something",
-            'value': infra.get('admin_key'),
+            'param': parameter,
+            'value': self.dss_auth_settings['api_key'],
             'type': "SecureString",
             'overwrite': True
         }
-        self.aws_client.create_or_update_parameter(self.config.automation_admin_key, self.config.token)
+        self.aws_client.create_or_update_parameter(ssm_config)
 
     @wrappers.dss_client
     def action_set_global_variables(self, config):
