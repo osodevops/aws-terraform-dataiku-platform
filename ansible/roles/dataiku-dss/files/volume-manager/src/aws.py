@@ -91,13 +91,18 @@ class Aws:
         logging.debug(f"Got response {response}")
         return response
 
-    def get_volume_data(self, az, volume_id="", search_tags={}):
+    def get_volume_data(self, az, volume_id="", snapshot_id="", search_tags={}):
         filter_tags = [
             {
                 'Name': 'availability-zone',
                 'Values': [az]
             },
         ]
+        if snapshot_id:
+            filter_tags.append({
+                'Name': "snapshot-id",
+                'Values': [snapshot_id]
+            })
 
         for tag_key, tag_value in search_tags.items():
             if tag_value:
@@ -135,7 +140,7 @@ class Aws:
         except botocore.exceptions.ClientError as err:
             logging.warning("Failed to remove old volume.")
 
-    def create_volume_from_snapshot(self, az, snapshot_id, instance_id, tags):
+    def set_common_params(self, instance_id, tags, az):
         tag_set = [
             {
                 'Key': 'Instance',
@@ -155,7 +160,6 @@ class Aws:
 
         parameters = {
             'AvailabilityZone': az,
-            'SnapshotId': snapshot_id,
             'VolumeType': self.config.volume_type,
             'Size': int(self.config.volume_size),
             'TagSpecifications': [
@@ -174,6 +178,12 @@ class Aws:
         if self.config.volume_iops:
             parameters['Iops'] = int(self.config.volume_iops)
 
+        return parameters
+
+    def create_volume_from_snapshot(self, az, snapshot_id, instance_id, tags):
+        parameters = self.set_common_params(instance_id, tags, az)
+        parameters['SnapshotId'] = snapshot_id
+
         logging.debug(f"Getting snapshot with parameters: {parameters}")
         response = self.ec2_client.create_volume(**parameters)
 
@@ -181,41 +191,7 @@ class Aws:
         return response['VolumeId']
 
     def create_blank_volume(self, az, instance_id, tags):
-        tag_set = [
-            {
-                'Key': 'Instance',
-                'Value': instance_id
-            },
-            {
-                'Key': 'Snapshot',
-                'Value': "true"
-            }
-        ]
-        for tag_key, tag_value in tags.items():
-            if tag_value:
-                tag_set.append({
-                    'Key': tag_key,
-                    'Value': tag_value
-                })
-
-        parameters = {
-            'AvailabilityZone': az,
-            'Size': int(self.config.volume_size),
-            'VolumeType': self.config.volume_type,
-            'TagSpecifications': [
-                {
-                    'ResourceType': 'volume',
-                    'Tags': tag_set
-                }
-            ]
-        }
-
-        if self.config.encrypt_volumes:
-            parameters['Encrypted'] = self.config.encrypt_volumes
-            parameters['KmsKeyId'] = self.config.kms_key
-
-        if self.config.volume_iops:
-            parameters['Iops'] = int(self.config.volume_iops)
+        parameters = self.set_common_params(instance_id, tags, az)
 
         logging.debug(f"Getting snapshot with parameters: {parameters}")
         response = self.ec2_client.create_volume(**parameters)
@@ -229,3 +205,17 @@ class Aws:
             InstanceId=instance_id,
             VolumeId=volume_id
         )
+
+    def match_volume_attachment(self, instance_id, tag_set):
+        instance = self.ec2_client.describe_instances(
+            InstanceIds=[
+                instance_id,
+            ]
+        )
+        for volume in instance['Reservations'][0]['Instances'][0]['BlockDeviceMappings']:
+            data = \
+            self.get_volume_data(az=self.az, volume_id=volume['Ebs']['VolumeId'], search_tags=tag_set)['Volumes'][0]
+            if data.get('Attachments', False):
+                if data['Attachments'][0]['State'] in ['attaching', 'attached']:
+                    return True
+        return False

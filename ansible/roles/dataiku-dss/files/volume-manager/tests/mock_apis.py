@@ -6,7 +6,7 @@ from dateutil.tz import tzutc
 from src.aws import Aws
 
 
-class MockAws (Aws):
+class MockAws(Aws):
     empty_snapshots: bool
 
     def __init__(self, empty_snapshots=False):
@@ -58,12 +58,13 @@ class MockAws (Aws):
             ]
         }
 
-    def get_volume_data(self, az, volume_id="", search_tags={}):
+    def get_volume_data(self, az, volume_id="", snapshot_id="", search_tags={}):
         return {'Volumes': [{
             'CreateTime': datetime(2020, 1, 1, 1, 1, 1, 950000, tzinfo=tzutc()),
             'VolumeId': '123456',
             'State': 'pending',
-            'AvailabilityZone': 'eu-west-2'
+            'AvailabilityZone': 'eu-west-2',
+            'SnapshotId': 'someid'
         }]
         }
 
