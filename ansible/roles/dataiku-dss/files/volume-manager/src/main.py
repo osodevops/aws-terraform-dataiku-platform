@@ -34,7 +34,7 @@ def main():
         'Environment': instance.tags['Environment'],
         'Name': instance.tags['Name'],
         'Application': 'Dataiku',
-        'DataVolume': 'true'
+        'DataVolume': 'True'
     }
 
     # Prevent race condition when previous machine is slow terminating
