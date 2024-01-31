@@ -214,10 +214,11 @@ class Aws:
                 instance_id,
             ]
         )
+        az = self.get_az_from_instance(instance_id)
         for volume in instance['Reservations'][0]['Instances'][0]['BlockDeviceMappings']:
-            data = \
-            self.get_volume_data(az=self.az, volume_id=volume['Ebs']['VolumeId'], search_tags=tag_set)['Volumes'][0]
-            if data.get('Attachments', False):
-                if data['Attachments'][0]['State'] in ['attaching', 'attached']:
-                    return True
+            data = self.get_volume_data(az=az, volume_id=volume['Ebs']['VolumeId'], search_tags=tag_set)
+            if data.get('Volumes'):
+                if data['Volumes'][0].get('Attachments', False):
+                    if data['Volumes'][0]['Attachments'][0]['State'] in ['attaching', 'attached']:
+                        return True
         return False
