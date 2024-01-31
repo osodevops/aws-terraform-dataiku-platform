@@ -32,7 +32,7 @@ class Volume:
         self.instance_id = event_data['instance_id']
         self.snapshot_id = ""
 
-    def get_volume(self, search_tag_set, snapshot_id, volume_id=""):
+    def get_volume(self, search_tag_set={}, snapshot_id="", volume_id=""):
         params = {
             'az': self.az,
         }
@@ -102,7 +102,7 @@ class Volume:
                 tags=create_tag_set
             )
             self.blank_fs = True
-        self._get_volumes(self.az, volume_id)
+        self.get_volume(volume_id=volume_id)
         logging.info(f"Volume id is {self.volume_id}")
 
         self._wait_for_pending()

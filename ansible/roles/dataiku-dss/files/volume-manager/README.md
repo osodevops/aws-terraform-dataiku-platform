@@ -10,8 +10,6 @@ The code is assumed to run on a Dataiku DSS node requiring a data volume.
 
 ## Environment variables
     LOG_LEVEL               Level of logging e.g. "INFO", "DEBUG"
-    MAX_WORKERS             Standard Lambda configuration. Typically 5
-    REGION                  Name of the region we are operating in
 
 ## Dynamic-settings.json
 This file should contain run-time settings that allow the code to do its job. These are:
@@ -23,8 +21,8 @@ This file should contain run-time settings that allow the code to do its job. Th
   "volume_size": "In GB",
   "mount_point": "Where on the filesystem to mount the data volume. Typically /data",
   "encrypt_volumes": "Whether to create new volumes as encrypted or not",
-  "kms_key": "If encrpyted, an optional custom kms key can be provided. Otherwise the AWS default EBS key will be used",
-  "device_name": "Ther system device. Typically /dev/xvda. Should not need to change"
+  "kms_key": "If encrypted, an optional custom kms key can be provided. Otherwise the AWS default EBS key will be used",
+  "device_name": "The system block-storage device. Typically /dev/xvdb. Should not need to change"
 }
 ```
 

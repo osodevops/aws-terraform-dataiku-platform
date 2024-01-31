@@ -9,7 +9,6 @@ from local_volume import LocalVolume
 from volume import Volume
 from config import Config
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -80,8 +79,8 @@ def main():
     volume_mgr.create_volume(create_tag_set=volume_tag_set)
 
     logger.info(f"Volume {volume_mgr.get_volume_data('volume_id')},"
-                 f" instance {instance.get_instance_data('instance_id')},"
-                 f" snapshot {snapshot.get_snapshot_data('snapshot_id')}")
+                f" instance {instance.get_instance_data('instance_id')},"
+                f" snapshot {snapshot.get_snapshot_data('snapshot_id')}")
 
     logger.info("Attaching volume")
     volume_mgr.attach(instance.get_instance_data())
