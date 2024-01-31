@@ -1,5 +1,8 @@
 import json
+import logging
 import sys
+
+logger = logging.getLogger(__name__)
 
 
 class DynamicConfig:
@@ -22,17 +25,18 @@ class DynamicConfig:
             with open(filename, 'r') as f:
                 file_values = json.loads(f.read())
         except FileNotFoundError:
-            print("configuration file has not been deployed. Ending run")
-            sys.exit()
+            logger.critical("configuration file has not been deployed. Ending run")
+            sys.exit(1)
         except (OSError, json.JSONDecodeError) as err:
-            print("Could not open/read the dynamic configuration file:", err)
-            raise
+            logger.critical(f"Could not open/read the dynamic configuration file: {err}")
+            sys.exit(1)
 
         self.config = {**self.defaults, **file_values}
 
     def get(self, key):
         value = self.config.get(key, None)
         if value is None:
-            raise Exception("Error getting dynamic config item \"%s\"", key)
+            logger.critical(f"Error getting dynamic config item {key}")
+            sys.exit(1)
 
         return value

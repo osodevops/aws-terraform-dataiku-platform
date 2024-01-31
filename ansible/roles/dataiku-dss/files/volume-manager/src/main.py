@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 
 from instance import Instance
@@ -7,6 +8,9 @@ from snapshot import Snapshot
 from local_volume import LocalVolume
 from volume import Volume
 from config import Config
+
+
+logger = logging.getLogger(__name__)
 
 
 class HandlerException(Exception):
@@ -18,7 +22,9 @@ class HandlerException(Exception):
 
 
 def main():
-    logging.info("Starting run")
+    logging.basicConfig(level=os.getenv("LOG_LEVEL", logging.INFO))
+
+    logger.info("Starting run")
 
     config = Config()
     aws_handler = Aws(config)
@@ -44,7 +50,7 @@ def main():
 
     # Is there a volume attachment that matches the volume spec
     if aws_handler.match_volume_attachment(instance_id=instance.get_instance_id(), tag_set=volume_tag_set):
-        logging.info(f"Volume is already attached. Exiting.")
+        logger.info(f"Volume is already attached. Exiting.")
         sys.exit(0)
 
     snapshot = Snapshot(
@@ -59,33 +65,33 @@ def main():
     # Snapshot is the source of truth. If it doesnt exist, create a new volume
     if snapshot.exists():
         # Wait for snapshot, if its still creating
-        logging.info(f"Got snapshot id: {snapshot.get_snapshot_data('snapshot_id')}")
-        logging.info("Waiting for snapshot to complete")
+        logger.info(f"Got snapshot id: {snapshot.get_snapshot_data('snapshot_id')}")
+        logger.info("Waiting for snapshot to complete")
         snapshot.wait_for_pending()
 
         # Remove prior volume that used the snapshot
         if volume_mgr.get_volume(
                 search_tag_set=volume_tag_set,
                 snapshot_id=snapshot.get_snapshot_data('snapshot_id')):
-            logging.info("Removing legacy volume tied to snapshot")
+            logger.info("Removing legacy volume tied to snapshot")
             volume_mgr.delete()
 
     # Create a new volume
     volume_mgr.create_volume(create_tag_set=volume_tag_set)
 
-    logging.info(f"Volume {volume_mgr.get_volume_data('volume_id')},"
+    logger.info(f"Volume {volume_mgr.get_volume_data('volume_id')},"
                  f" instance {instance.get_instance_data('instance_id')},"
                  f" snapshot {snapshot.get_snapshot_data('snapshot_id')}")
 
-    logging.info("Attaching volume")
+    logger.info("Attaching volume")
     volume_mgr.attach(instance.get_instance_data())
 
     local_volume = LocalVolume(volume_data=volume_mgr.get_volume_data(), config=config)
 
-    logging.info("Creating / resizing filesystem")
+    logger.info("Creating / resizing filesystem")
     local_volume.initialise_filesystem()
 
-    logging.info("Mounting filesystem")
+    logger.info("Mounting filesystem")
     local_volume.mount(configure_fstab=True)
     local_volume.set_mount_ownership(user='dataiku', group='dataiku')
 

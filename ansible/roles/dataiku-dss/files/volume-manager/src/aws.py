@@ -5,6 +5,8 @@ import botocore
 
 from config import Config
 
+logger = logging.getLogger(__name__)
+
 
 class Aws:
     ec2_client: boto3.client
@@ -79,7 +81,7 @@ class Aws:
         else:
             parameters['MaxResults'] = 100
 
-        logging.debug(f"Getting snapshot with parameters: {parameters}")
+        logger.debug(f"Getting snapshot with parameters: {parameters}")
         try:
             response = self.ec2_client.describe_snapshots(**parameters)
         except botocore.exceptions.ClientError:
@@ -88,7 +90,7 @@ class Aws:
         if not response['Snapshots']:
             return None
 
-        logging.debug(f"Got response {response}")
+        logger.debug(f"Got response {response}")
         return response
 
     def get_volume_data(self, az, volume_id="", snapshot_id="", search_tags={}):
@@ -120,7 +122,7 @@ class Aws:
         else:
             parameters['MaxResults'] = 100
 
-        logging.debug(f"Getting volume with parameters: {parameters}")
+        logger.debug(f"Getting volume with parameters: {parameters}")
 
         try:
             response = self.ec2_client.describe_volumes(**parameters)
@@ -130,7 +132,7 @@ class Aws:
         if not response['Volumes']:
             return None
 
-        logging.debug(f"Got response {response}")
+        logger.debug(f"Got response {response}")
         return response
 
     def delete_volume(self, volume_id):
@@ -138,7 +140,7 @@ class Aws:
             response = self.ec2_client.delete_volume(VolumeId=volume_id)
             return response
         except botocore.exceptions.ClientError as err:
-            logging.warning("Failed to remove old volume.")
+            logger.warning("Failed to remove old volume.")
 
     def set_common_params(self, instance_id, tags, az):
         tag_set = [
@@ -184,19 +186,19 @@ class Aws:
         parameters = self.set_common_params(instance_id, tags, az)
         parameters['SnapshotId'] = snapshot_id
 
-        logging.debug(f"Getting snapshot with parameters: {parameters}")
+        logger.debug(f"Getting snapshot with parameters: {parameters}")
         response = self.ec2_client.create_volume(**parameters)
 
-        logging.debug(f"Got response {response}")
+        logger.debug(f"Got response {response}")
         return response['VolumeId']
 
     def create_blank_volume(self, az, instance_id, tags):
         parameters = self.set_common_params(instance_id, tags, az)
 
-        logging.debug(f"Getting snapshot with parameters: {parameters}")
+        logger.debug(f"Getting snapshot with parameters: {parameters}")
         response = self.ec2_client.create_volume(**parameters)
 
-        logging.debug(f"Got response {response}")
+        logger.debug(f"Got response {response}")
         return response['VolumeId']
 
     def attach_volume(self, instance_id, volume_id):

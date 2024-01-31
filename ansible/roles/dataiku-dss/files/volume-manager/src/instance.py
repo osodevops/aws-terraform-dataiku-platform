@@ -4,6 +4,8 @@ import time
 import requests
 from aws import Aws
 
+logger = logging.getLogger(__name__)
+
 
 class Instance:
     instance_id: [str, None]
@@ -48,10 +50,10 @@ class Instance:
     def wait_for_instances(self, states=[], additional_tags={}, max_attempts=30):
         attempts = 1
         while self.aws_handler.get_instance_id(states=states, additional_tags=additional_tags, exclude_id=self.instance_id):
-            logging.warning("Waiting for instances in state %s" % states)
+            logger.warning("Waiting for instances in state %s" % states)
             time.sleep(self.sleep_wait_period)
             if attempts >= max_attempts:
-                logging.warning('Reached maximum number of retries waiting for instance')
+                logger.warning('Reached maximum number of retries waiting for instance')
                 break
             attempts += 1
 

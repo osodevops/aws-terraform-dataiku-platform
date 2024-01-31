@@ -27,7 +27,6 @@ class Config:
             self.volume_size = dynamic_config.get('volume_size')
             self.volume_device_name = dynamic_config.get('device_name')
             self.volume_mount_point = dynamic_config.get('mount_point')
-
             self.boto_config = botocore.config.Config(
                 region_name=region,
                 signature_version='v4',
@@ -38,8 +37,3 @@ class Config:
             )
         except KeyError as err:
             raise VolumeException('Could not import all configuration values', err)
-
-        logging.basicConfig(level=os.environ.get('LOG_LEVEL', 'INFO'))
-        self.log = logging.getLogger(__name__)
-        self.log.setLevel(logging.INFO)
-        logging.getLogger("botocore").setLevel(logging.WARNING)
