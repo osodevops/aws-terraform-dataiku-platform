@@ -50,7 +50,7 @@ class LocalVolume:
         gid = grp.getgrnam(group).gr_gid
         os.chown(mount_point, uid, gid)
 
-    def unmount(self, mount_point=False):
+    def unmount(self, mount_point=""):
         if not mount_point:
             mount_point = self.config.volume_mount_point
         try:
