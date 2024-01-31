@@ -76,6 +76,8 @@ resource "aws_dlm_lifecycle_policy" "dlm_policy" {
     parameters {
       exclude_boot_volume = true
     }
-    target_tags = var.target_instance_tag
+    target_tags = {
+      "${var.target_instance_tag}" = "True"
+    }
   }
 }

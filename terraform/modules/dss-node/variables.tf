@@ -36,9 +36,63 @@ variable "aws_region" {
   type        = string
 }
 
+variable "dlm_target_instance_tag" {
+  description = "Provide a single tag for the DLM schedule to target."
+  type        = string
+  default     = "DLMSnapshot"
+}
+
+variable "dr_target_instance_tag" {
+  description = "Provide a single tag for the lambda to target."
+  type        = string
+  default     = "DRSnapshot"
+}
+
 variable "cloudwatch_alarm_topic_name" {
   description = "Name of the SNS cloud topic used for cloudwatch alerts"
   type        = string
+}
+
+variable "data_volume_device_name" {
+  description = "Name of the device. Generally doesnt need to change"
+  type        = string
+  default     = "/dev/xvdb"
+}
+
+variable "data_volume_encrypt" {
+  description = "Whether to encrypt the volume"
+  type        = bool
+  default     = false
+}
+
+variable "data_volume_iops" {
+  description = "IOPS attributed to the data volume"
+  type        = string
+  default     = "100"
+}
+
+variable "data_volume_kms_key" {
+  description = "Custom KMS key to use"
+  type        = string
+  default     = ""
+}
+
+variable "data_volume_mount_point" {
+  description = "Where on the filesystem the volume is mounted"
+  type        = string
+  default     = "/data"
+}
+
+variable "data_volume_size" {
+  description = "Size of the data volume to create or resize in GB"
+  type        = string
+  default     = "100"
+}
+
+variable "data_volume_type" {
+  description = "Type of data volume to create"
+  type = string
+  default = "gp3"
 }
 
 variable "dss_s3_config_bucket" {
@@ -61,12 +115,13 @@ variable "dss_node_type" {
 }
 
 variable "dss_service_port" {
-  description = ""
+  description = "Port that DSS is listening on for connections"
   type        = string
   default     = "11200"
 }
 
 variable "dss_service_protocol" {
+  description = "Is DSS operating in HTTP or HTTPS mode"
   type    = string
   default = "HTTP"
 }
@@ -187,6 +242,12 @@ variable "lb_log_s3_bucket_name" {
   type        = string
 }
 
+variable "node_name" {
+  description = "Optionally provide an explicit node name that will be used for naming resources"
+  type = string
+  default = ""
+}
+
 variable "private_subnet_name_filter" {
   description = "Filter to use with 'Name' tag to identity private subnets"
   type        = string
@@ -265,18 +326,38 @@ variable "vpc_name" {
 
 locals {
   ami_owner                 = var.ami_owner_account != "" ? var.ami_owner_account : data.aws_caller_identity.current.account_id
-  resource_title            = "dss-${var.environment}-${var.dss_node_type}"
+  resource_title            = var.node_name != "" ? var.node_name : "dss-${var.environment}-${var.dss_node_type}"
   api_dynamic_settings_json = merge(var.api_dynamic_settings_json, {
+    "region" : var.aws_region,
     "instance_type" : var.dss_node_type
   })
+
+  volume_dynamic_settings_json = merge(var.volume_dynamic_settings_json, {
+    "region" : var.aws_region,
+    "volume_type" : var.data_volume_type,
+    "volume_iops": var.data_volume_iops,
+    "volume_size" : var.data_volume_size,
+    "mount_point": var.data_volume_mount_point,
+    "encrypt_volumes": var.data_volume_encrypt ? "true" : "false",
+    "kms_key": var.data_volume_kms_key,
+    "device_name": var.data_volume_device_name,
+  })
+
+  system_settings_json = {
+    "aws_region": var.aws_region,
+    "node_type": var.dss_node_type,
+    "dss_config_s3_bucket": var.dss_s3_config_bucket,
+    "dss_config_s3_key": var.dss_s3_config_key,
+  }
   asg_tags = concat(
     null_resource.asg_tags[*].triggers,
     [
-      { key : "Name", value : "${local.resource_title}-dss-asg" },
+      { key : "Name", value : local.resource_title, propagate_at_launch : true },
       { key : "AWSInspectorEnabled", value : "true" },
-      { key : "Environment", value : var.environment },
+      { key : "Environment", value : var.environment, propagate_at_launch : true },
       { key : "DssNode", value : var.dss_node_type, propagate_at_launch : true },
-      { key : "ConfigS3Bucket", value : var.dss_s3_config_bucket, propagate_at_launch : true },
-      { key : "ConfigS3Key", value : var.dss_s3_config_key, propagate_at_launch : true }
+      { key : var.dlm_target_instance_tag == "" ? "noDlm" : var.dlm_target_instance_tag, value : "True", propagate_at_launch : true },
+      { key : var.dr_target_instance_tag == "" ? "noDr" : var.dr_target_instance_tag, value : "True", propagate_at_launch : true },
+
     ])
 }

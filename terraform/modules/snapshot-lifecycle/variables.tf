@@ -41,8 +41,6 @@ variable "snapshot_time" {
 
 variable "target_instance_tag" {
   description = "Map of tags to value that select instances for snapshot"
-  type = map(string)
-  default = {
-    DssSnapshot = "true"
-  }
+  type = string
+  default = "DssSnapshot"
 }

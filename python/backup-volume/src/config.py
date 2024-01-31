@@ -20,10 +20,7 @@ class Config:
                 'mode': 'standard'
             }
         )
-        tag_application = os.environ.get('TAG_APPLICATION', 'Dataiku')
-        tag_environment = os.environ.get('TAG_ENVIRONMENT', "")
-        tag_deployment = os.environ.get('TAG_DEPLOYMENT', "")
-        database_id = os.environ.get('DATABASE_ID', 'dataiku')
+        tag_target = os.environ.get('TAG_TARGET', 'DRSnapshot')
     except KeyError as err:
         raise ConfigException('Could not import all configuration values', err)
 
