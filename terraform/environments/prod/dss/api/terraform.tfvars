@@ -31,7 +31,7 @@ environment = "prod"
 private_subnet_name_filter = "*Private*"
 
 # String and wildcards for finding the public subnets in your VPC
-public_subnet_name_filter = "*Private*"
+public_subnet_name_filter = "*Public*"
 
 # The name (not ID) of the VPC we are deploying to
 vpc_name = "MY-VPC-NAME"
