@@ -5,4 +5,8 @@ common_tags = {
   Component   = "iam access roles"
 }
 
+# Creates security groups named "<item>-access" for use in cross-node access
 security_group_target_names = ["automation", "api", "design"]
+
+# The name (not ID) of the VPC we are deploying to
+vpc_name = "MY-VPC-NAME"
