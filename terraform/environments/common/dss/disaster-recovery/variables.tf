@@ -21,8 +21,8 @@ variable "dlm_enable_policy" {
 
 variable "dlm_target_instance_tag" {
   description = "Provide a map of tags for the DLM to target."
-  type        = map(string)
-  default     = {}
+  type        = string
+  default     = "DLMSnapshot"
 }
 
 variable "dr_cloudwatch_alarm_sns_topic_name" {
@@ -33,7 +33,7 @@ variable "dr_cloudwatch_alarm_sns_topic_name" {
 variable "dr_target_instance_tag" {
   description = "Provide a single tag for the lambda to target."
   type        = string
-  default     = "DssRealtimeBackup"
+  default     = "DRSnapshot"
 }
 
 variable "dlm_retain_snapshot_count" {

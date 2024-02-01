@@ -28,43 +28,33 @@ def lambda_handler(event, context):
         Config.log.info("Validating event")
         instance.validate_state('terminated')
         instance.validate_region(Config.region)
-        instance.validate_tags({
-            'Environment': Config.tag_environment,
-            'Deployment': Config.tag_deployment,
-            'Application': Config.tag_application,
-            'DssNode': ['design', 'automation']
-        })
+
+        instance_validation_tags = {
+            'Application': 'Dataiku',
+            Config.tag_target: ['True']
+        }
+
+        # instance tags must match Application, and custom tag - TODO
+        instance.validate_tags(instance_validation_tags)
 
         Config.log.info(f"Found instance termination event for {event.get_event_data('instance_id')}")
 
         Config.log.info(f"Getting volume")
-        volume = Volume(event.get_event_data(), aws_handler, search_tags={
-            'Application': Config.tag_application,
-            'Environment': Config.tag_environment,
-            'Deployment': Config.tag_deployment,
-            'DssNode': instance.tags['DssNode']
-        })
+
+        # volume must match everything
+        volume_search_tags = {
+            'Environment': instance.tags['Environment'],
+            'Name': instance.tags['Name'],
+            'Application': 'Dataiku',
+            'DataVolume': 'True',
+        }
+        volume = Volume(event.get_event_data(), aws_handler, search_tags=volume_search_tags)
 
         Config.log.info(f"Creating snapshot")
-        # todo
-        snapshot_id = volume.create_snapshot(additional_tags={
-            'Environment': Config.tag_environment,
-            'Deployment': Config.tag_deployment,
-            'Application': Config.tag_application,
-            'DssNode': instance.tags['DssNode'],
-            'Name': 'Dataiku-data-volume',
-        })
+        # New snapshot must have all tags required by volume manager
+        snapshot_id = volume.create_snapshot(additional_tags=volume_search_tags)
         volume.remove_snapshot_tag()
         Config.log.info(f"Created snapshot id: {snapshot_id}")
-
-        Config.log.info("Creating RDS snapshot")
-        rds = Rds(aws_handler)
-        rds_snapshot_id = rds.create_snapshot(additional_tags={
-            'Environment': Config.tag_environment,
-            'Deployment': Config.tag_deployment,
-            'Application': Config.tag_application,
-        })
-        Config.log.info(f"Created RDS snapshot id: {rds_snapshot_id}")
 
         return {"Message": f"Snapshot creation run completed: Created snapshot id: {snapshot_id}"}
     except BackupException:

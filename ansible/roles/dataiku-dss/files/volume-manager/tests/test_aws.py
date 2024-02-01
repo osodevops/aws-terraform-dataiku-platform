@@ -2,18 +2,18 @@ import logging
 
 import boto3
 import botocore.config
-from moto import mock_ec2, mock_sts
+from moto import mock_aws
 
 from src.aws import Aws
 from src.config import Config
 
 
 class MockConfig(Config):
+
     def __init__(self, region):
         self.region = region
 
         # Tag settings
-
 
         # Volume settings
         self.encrypt_volumes = True
@@ -38,15 +38,15 @@ class MockConfig(Config):
         self.log.setLevel(logging.INFO)
         logging.getLogger("botocore").setLevel(logging.WARNING)
 
-@mock_ec2
-@mock_sts
+
+@mock_aws
 def test_get_instance_id_with_exclude():
     config = MockConfig(
         region='eu-west-2'
     )
     aws_client = Aws(config)
 
-    vpc_response =  aws_client.ec2_client.create_vpc(
+    vpc_response = aws_client.ec2_client.create_vpc(
         CidrBlock='192.168.0.0/16',
     )
 
@@ -75,15 +75,14 @@ def test_get_instance_id_with_exclude():
         additional_tags={}) == instance_id
 
 
-@mock_ec2
-@mock_sts
+@mock_aws
 def test_get_instance_id_with_deployments():
     config = MockConfig(
         region='eu-west-2'
     )
     aws_client = Aws(config)
 
-    vpc_response =  aws_client.ec2_client.create_vpc(
+    vpc_response = aws_client.ec2_client.create_vpc(
         CidrBlock='192.168.0.0/16',
     )
 
@@ -102,26 +101,25 @@ def test_get_instance_id_with_deployments():
         ['wrong', 'foo_b', 'foo_c'],
         ['wrong', 'wrong', 'wrong']
     ]:
-
         tags = [
-                {
-                    'ResourceType': 'instance',
-                    'Tags': [
-                        {
-                            'Key': 'tag_a',
-                            'Value': tag_a
-                        },
-                        {
-                            'Key': 'tag_b',
-                            'Value': tag_b
-                        },
-                        {
-                            'Key': 'tag_c',
-                            'Value': tag_c
-                        }
-                    ]
-                }
-            ]
+            {
+                'ResourceType': 'instance',
+                'Tags': [
+                    {
+                        'Key': 'tag_a',
+                        'Value': tag_a
+                    },
+                    {
+                        'Key': 'tag_b',
+                        'Value': tag_b
+                    },
+                    {
+                        'Key': 'tag_c',
+                        'Value': tag_c
+                    }
+                ]
+            }
+        ]
 
         aws_client.ec2_client.run_instances(
             ImageId='ami-03cf127a',
@@ -132,49 +130,52 @@ def test_get_instance_id_with_deployments():
             TagSpecifications=tags
         )
 
-    assert aws_client.get_instance_id(['running'], additional_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'}) is None
+    assert aws_client.get_instance_id(['running'],
+                                      additional_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'}) is None
 
     # Define correct instance
     ec2_response = aws_client.ec2_client.run_instances(
-            ImageId='ami-03cf127a',
-            InstanceType='t3.medium',
-            SubnetId=subnet_response['Subnet']['SubnetId'],
-            MaxCount=1,
-            MinCount=1,
-            TagSpecifications=[
-                {
-                    'ResourceType': 'instance',
-                    'Tags': [
-                        {
-                            'Key': 'tag_a',
-                            'Value': "foo_a"
-                        },
-                        {
-                            'Key': 'tag_b',
-                            'Value': "foo_b"
-                        },
-                        {
-                            'Key': 'tag_c',
-                            'Value': "foo_c"
-                        }
-                    ]
-                }
-            ]
-        )
+        ImageId='ami-03cf127a',
+        InstanceType='t3.medium',
+        SubnetId=subnet_response['Subnet']['SubnetId'],
+        MaxCount=1,
+        MinCount=1,
+        TagSpecifications=[
+            {
+                'ResourceType': 'instance',
+                'Tags': [
+                    {
+                        'Key': 'tag_a',
+                        'Value': "foo_a"
+                    },
+                    {
+                        'Key': 'tag_b',
+                        'Value': "foo_b"
+                    },
+                    {
+                        'Key': 'tag_c',
+                        'Value': "foo_c"
+                    }
+                ]
+            }
+        ]
+    )
 
-    assert aws_client.get_instance_id(['running'], additional_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'}) == ec2_response['Instances'][0]['InstanceId']
-    assert not aws_client.get_instance_id(['notrunning'], additional_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'})
+    assert aws_client.get_instance_id(['running'],
+                                      additional_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'}) == \
+           ec2_response['Instances'][0]['InstanceId']
+    assert not aws_client.get_instance_id(['notrunning'],
+                                          additional_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'})
 
 
-@mock_ec2
-@mock_sts
+@mock_aws
 def test_get_instance_id_null_tag():
     config = MockConfig(
         region='eu-west-2'
     )
     aws_client = Aws(config)
 
-    vpc_response =  aws_client.ec2_client.create_vpc(
+    vpc_response = aws_client.ec2_client.create_vpc(
         CidrBlock='192.168.0.0/16',
     )
 
@@ -185,41 +186,41 @@ def test_get_instance_id_null_tag():
 
     # Define correct instance
     ec2_response = aws_client.ec2_client.run_instances(
-            ImageId='ami-03cf127a',
-            InstanceType='t3.medium',
-            SubnetId=subnet_response['Subnet']['SubnetId'],
-            MaxCount=1,
-            MinCount=1,
-            TagSpecifications=[
-                {
-                    'ResourceType': 'instance',
-                    'Tags': [
-                        {
-                            'Key': 'tag_a',
-                            'Value': 'foo_a'
-                        },
-                        {
-                            'Key': 'tag_b',
-                            'Value': 'foo_b'
-                        },
-                        {
-                            'Key': 'tag_c',
-                            'Value': 'foo_c'
-                        },
-                    ]
-                }
-            ]
-        )
+        ImageId='ami-03cf127a',
+        InstanceType='t3.medium',
+        SubnetId=subnet_response['Subnet']['SubnetId'],
+        MaxCount=1,
+        MinCount=1,
+        TagSpecifications=[
+            {
+                'ResourceType': 'instance',
+                'Tags': [
+                    {
+                        'Key': 'tag_a',
+                        'Value': 'foo_a'
+                    },
+                    {
+                        'Key': 'tag_b',
+                        'Value': 'foo_b'
+                    },
+                    {
+                        'Key': 'tag_c',
+                        'Value': 'foo_c'
+                    },
+                ]
+            }
+        ]
+    )
 
     assert aws_client.get_instance_id(
         ['running'],
         additional_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': None}
     ) == ec2_response['Instances'][0]['InstanceId']
-    assert aws_client.get_instance_id(['notrunning'], additional_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': None}) is None
+    assert aws_client.get_instance_id(['notrunning'],
+                                      additional_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': None}) is None
 
 
-@mock_ec2
-@mock_sts
+@mock_aws
 def test_get_volume_data_deployments():
     config = MockConfig(
         region='eu-west-2'
@@ -237,19 +238,19 @@ def test_get_volume_data_deployments():
         ['wrong', 'wrong', 'wrong']
     ]:
         tags = [
-                    {
-                        'Key': 'tag_a',
-                        'Value': tag_a
-                    },
-                    {
-                        'Key': 'tag_b',
-                        'Value': tag_b
-                    },
-                    {
-                        'Key': 'tag_c',
-                        'Value': tag_c
-                    }
-                ]
+            {
+                'Key': 'tag_a',
+                'Value': tag_a
+            },
+            {
+                'Key': 'tag_b',
+                'Value': tag_b
+            },
+            {
+                'Key': 'tag_c',
+                'Value': tag_c
+            }
+        ]
 
         aws_client.ec2_client.create_volume(
             AvailabilityZone='eu-west-2a',
@@ -293,18 +294,19 @@ def test_get_volume_data_deployments():
         ]
     )
 
-    assert aws_client.get_volume_data('eu-west-2a', volume_id=response['VolumeId'])['Volumes'][0]['VolumeId'] == response['VolumeId']
+    assert aws_client.get_volume_data('eu-west-2a', volume_id=response['VolumeId'])['Volumes'][0]['VolumeId'] == \
+           response['VolumeId']
     assert aws_client.get_volume_data('eu-west-2a',
                                       search_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'}
                                       )['Volumes'][0]['VolumeId'] == response['VolumeId']
 
     assert len(aws_client.get_volume_data('eu-west-2a')['Volumes']) == 8
     assert aws_client.get_volume_data('eu-west-2a', volume_id='fail') is None
-    assert aws_client.get_volume_data('eu-west-2b', search_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'}) is None
+    assert aws_client.get_volume_data('eu-west-2b',
+                                      search_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'}) is None
 
 
-@mock_ec2
-@mock_sts
+@mock_aws
 def test_get_volume_data_environments():
     config = MockConfig(
         region='eu-west-2'
@@ -342,8 +344,7 @@ def test_get_volume_data_environments():
                                       )['Volumes'][0]['VolumeId'] == response['VolumeId']
 
 
-@mock_ec2
-@mock_sts
+@mock_aws
 def test_get_snapshot_data_deployments():
     config = MockConfig(
         region='eu-west-2'
@@ -370,19 +371,19 @@ def test_get_snapshot_data_deployments():
         ['wrong', 'wrong', 'wrong']
     ]:
         tags = [
-                    {
-                        'Key': 'tag_a',
-                        'Value': tag_a
-                    },
-                    {
-                        'Key': 'tag_b',
-                        'Value': tag_b
-                    },
-                    {
-                        'Key': 'tag_c',
-                        'Value': tag_c
-                    }
-                ]
+            {
+                'Key': 'tag_a',
+                'Value': tag_a
+            },
+            {
+                'Key': 'tag_b',
+                'Value': tag_b
+            },
+            {
+                'Key': 'tag_c',
+                'Value': tag_c
+            }
+        ]
 
         aws_client.ec2_client.create_snapshot(
             VolumeId=vol_response['VolumeId'],
@@ -398,32 +399,34 @@ def test_get_snapshot_data_deployments():
 
     # Create correct entry
     response = aws_client.ec2_client.create_snapshot(
-            VolumeId=vol_response['VolumeId'],
-            TagSpecifications=[{
-                'ResourceType': 'snapshot',
-                'Tags': [{
-                        'Key': 'tag_a',
-                        'Value': 'foo_a'
-                    },
-                    {
-                        'Key': 'tag_b',
-                        'Value': 'foo_b'
-                    },
-                    {
-                        'Key': 'tag_c',
-                        'Value': 'foo_c'
-                    }]
-            }]
-        )
+        VolumeId=vol_response['VolumeId'],
+        TagSpecifications=[{
+            'ResourceType': 'snapshot',
+            'Tags': [{
+                'Key': 'tag_a',
+                'Value': 'foo_a'
+            },
+                {
+                    'Key': 'tag_b',
+                    'Value': 'foo_b'
+                },
+                {
+                    'Key': 'tag_c',
+                    'Value': 'foo_c'
+                }]
+        }]
+    )
+
+    assert aws_client.get_snapshot_data(snapshot_id=response['SnapshotId'])['Snapshots'][0]['SnapshotId'] == response[
+        'SnapshotId']
+    assert \
+    aws_client.get_snapshot_data(search_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'})['Snapshots'][0][
+        'SnapshotId'] == response['SnapshotId']
+    assert aws_client.get_snapshot_data(snapshot_id='fail',
+                                        search_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'}) is None
 
 
-    assert aws_client.get_snapshot_data(snapshot_id=response['SnapshotId'])['Snapshots'][0]['SnapshotId'] == response['SnapshotId']
-    assert aws_client.get_snapshot_data(search_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'})['Snapshots'][0]['SnapshotId'] == response['SnapshotId']
-    assert aws_client.get_snapshot_data(snapshot_id='fail', search_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': 'foo_c'}) is None
-
-
-@mock_ec2
-@mock_sts
+@mock_aws
 def test_get_snapshot_data_environments():
     config = MockConfig(
         region='eu-west-2'
@@ -438,38 +441,37 @@ def test_get_snapshot_data_environments():
 
     # Create correct entry
     response = aws_client.ec2_client.create_snapshot(
-            VolumeId=vol_response['VolumeId'],
-            TagSpecifications=[{
-                'ResourceType': 'snapshot',
-                'Tags': [{
-                        'Key': 'tag_a',
-                        'Value': 'foo_a'
-                    },
-                    {
-                        'Key': 'tag_b',
-                        'Value': 'foo_b'
-                    },
-                    {
-                        'Key': 'tag_c',
-                        'Value': 'foo_c'
-                    }]
-    }]
-        )
+        VolumeId=vol_response['VolumeId'],
+        TagSpecifications=[{
+            'ResourceType': 'snapshot',
+            'Tags': [{
+                'Key': 'tag_a',
+                'Value': 'foo_a'
+            },
+                {
+                    'Key': 'tag_b',
+                    'Value': 'foo_b'
+                },
+                {
+                    'Key': 'tag_c',
+                    'Value': 'foo_c'
+                }]
+        }]
+    )
 
     assert aws_client.get_snapshot_data(
         search_tags={'tag_a': 'foo_a', 'tag_b': 'foo_b', 'tag_c': None}
     )['Snapshots'][0]['SnapshotId'] == response['SnapshotId']
 
 
-@mock_ec2
-@mock_sts
+@mock_aws
 def test_create_volume_from_snapshot_deployments():
     config = MockConfig(
         region='eu-west-2'
     )
     aws_client = Aws(config)
 
-    vpc_response =  aws_client.ec2_client.create_vpc(
+    vpc_response = aws_client.ec2_client.create_vpc(
         CidrBlock='192.168.0.0/16',
     )
 
@@ -532,8 +534,7 @@ def test_create_volume_from_snapshot_deployments():
     assert {'Key': 'tag_c', 'Value': 'foo_c'} in new_vol_response['Volumes'][0]['Tags']
 
 
-@mock_ec2
-@mock_sts
+@mock_aws
 def test_get_volume_data_no_volumes():
     config = MockConfig(
         region='eu-west-2'

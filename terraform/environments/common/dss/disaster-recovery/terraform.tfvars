@@ -7,6 +7,7 @@ common_tags = {
 # This wrapper can be deployed for a whole VPC, or for sub-sections of your environment. Tailor to suit.
 environment = "common"
 
+
 ###################################################
 # Options for Data Lifecycle Management rules (passive, scheduled backups)
 ###################################################
@@ -24,9 +25,8 @@ dlm_schedule_name = "1 week of daily snapshots"
 dlm_snapshot_time = "23:00"
 
 # Regular backups via DLM will target instances with any of these tags and values
-dlm_target_instance_tag = {
-  DssSnapshot = "True"
-}
+dlm_target_instance_tag = "DLMSnapshot"
+
 
 ###################################################
 # Options for real-time snapshot solution
@@ -49,4 +49,4 @@ dr_source_s3_bucket_name = "NAME-OF-AN-S3-BUCKET"
 dr_source_s3_bucket_key = "KEY-OF-BUILT-LAMBDA-SOURCE"
 
 # Any volume containing this tag will be selected for instant snapshot when an instance is terminated. Value on the instance must be "true"
-dr_target_instance_tag = "DssRealtimeBackup"
+dr_target_instance_tag = "DRSnapshot"

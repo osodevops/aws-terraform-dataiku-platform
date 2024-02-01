@@ -2,23 +2,23 @@ import logging
 
 import dataikuapi
 
-from aws_helper.helper import AwsHelper
-from src import wrappers
-from src.dss_cluster import Cluster
-from src.dss_code_env import CodeEnv
-from src.config_generator import ConfigGenerator
-from src.dss_connection import Connection
-from src.dataiku_controller import DataikuController
-from src.dss_general_settings import GeneralSettings
-from src.dss_global_variables import GlobalVariables
-from src.dss_infrastructure import Infrastructure
-from src.dss_install_ini import InstallIni
-from src.dss_instance import Instance
-from src.dss_license import License
-from src.dss_plugin import Plugin
-from src.dss_project_infrastructure import ProjectInfrastructure
-from src.dss_rds import Rds
-from src.dss_user import User
+from aws_helper import AwsHelper, aws_provider
+import wrappers
+from dss_cluster import Cluster
+from dss_code_env import CodeEnv
+from config_generator import ConfigGenerator
+from dss_connection import Connection
+from dataiku_controller import DataikuController
+from dss_general_settings import GeneralSettings
+from dss_global_variables import GlobalVariables
+from dss_infrastructure import Infrastructure
+from dss_install_ini import InstallIni
+from dss_instance import Instance
+from dss_license import License
+from dss_plugin import Plugin
+from dss_project_infrastructure import ProjectInfrastructure
+from dss_rds import Rds
+from dss_user import User
 
 logger = logging.getLogger(__name__)
 
@@ -28,16 +28,19 @@ class Configurator:
     apideployer_client: [dataikuapi.dss.apideployer.DSSAPIDeployer, None]
     dss_service_handler: [DataikuController, None]
     dss_auth_settings: dict
-    aws_region: str
+    aws_settings: dict
     aws_client: AwsHelper
     config_generator: ConfigGenerator
     dss_service_settings: dict
 
     def __init__(self, dss_auth_settings={}, aws_region="", dss_service_settings={}) -> None:
         self.dss_auth_settings = dss_auth_settings
-        self.aws_region = aws_region
+        self.aws_settings = {"aws_region": aws_region}
         self.config_generator = ConfigGenerator()
         self.dss_service_settings = dss_service_settings
+        self.dss_client = None
+        self.apideployer_client = None
+        self.dss_service_handler = None
 
     @wrappers.dss_client
     def action_set_admin_password(self, config):
@@ -269,17 +272,17 @@ class Configurator:
         )
 
     # todo: fix this up
-    @wrappers.aws_provider
+    @aws_provider
     @wrappers.dss_service_handler
     @wrappers.dss_client
-    def action_store_admin_api_token(self):
+    def action_store_admin_api_token(self, parameter):
         ssm_config = {
-            'param': "something",
-            'value': "something",
+            'param': parameter,
+            'value': self.dss_auth_settings['api_key'],
             'type': "SecureString",
             'overwrite': True
         }
-        self.aws_client.create_or_update_parameter(self.config.automation_admin_key, self.config.token)
+        self.aws_client.create_or_update_parameter(ssm_config)
 
     @wrappers.dss_client
     def action_set_global_variables(self, config):

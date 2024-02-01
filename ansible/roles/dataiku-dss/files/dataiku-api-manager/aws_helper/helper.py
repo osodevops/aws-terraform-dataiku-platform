@@ -6,8 +6,9 @@ import botocore
 
 import botocore.exceptions
 import botocore.config
+import requests
 
-from exceptions import AwsHelperException
+from aws_helper.exceptions import AwsHelperException
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ def aws_provider(func):
     def wrapper(self, *args, **kwargs):
         if not self.aws_handler:
             logger.info(f"Configuring AWS connection")
-            if not self.aws_settings.get('aws_region:'):
+            if not self.aws_settings.get('aws_region'):
                 self.aws_settings['aws_region'] = requests.get('http://169.254.169.254/latest/meta-data/placement/availability-zone').text[:-1]
             self.aws_handler = AwsHelper(
                 boto_config=botocore.config.Config(

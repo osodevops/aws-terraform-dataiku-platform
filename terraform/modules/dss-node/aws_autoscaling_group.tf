@@ -13,10 +13,9 @@ resource "aws_launch_template" "dataiku_dss_launch_template" {
   }
 
   user_data = base64encode(templatefile("${path.module}/templates/cloud_init_dataiku_dss.sh", {
-    region                       = var.aws_region
-    environment                  = var.environment
     api_dynamic_settings_json    = jsonencode(local.api_dynamic_settings_json)
     volume_dynamic_settings_json = jsonencode(var.volume_dynamic_settings_json)
+    system_settings_json = jsonencode(local.system_settings_json)
   }))
 
   iam_instance_profile {

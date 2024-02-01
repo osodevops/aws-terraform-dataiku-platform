@@ -15,7 +15,7 @@ def string_to_bool(data):
 class Config:
     def __init__(self):
         try:
-            dynamic_config = DynamicConfig("/opt/volume-manager/dynamic-settings.json")
+            dynamic_config = DynamicConfig("/opt/dataiku-python/volume-manager/dynamic-settings.json")
 
             region = dynamic_config.get('region')
 
@@ -25,9 +25,8 @@ class Config:
             self.kms_key = dynamic_config.get('kms_key')
             self.volume_type = dynamic_config.get('volume_type')
             self.volume_size = dynamic_config.get('volume_size')
-            self.volume_device_name = dynamic_config.get('volume_device_name')
-            self.volume_mount_point = dynamic_config.get('volume_mount_point')
-
+            self.volume_device_name = dynamic_config.get('device_name')
+            self.volume_mount_point = dynamic_config.get('mount_point')
             self.boto_config = botocore.config.Config(
                 region_name=region,
                 signature_version='v4',
@@ -38,8 +37,3 @@ class Config:
             )
         except KeyError as err:
             raise VolumeException('Could not import all configuration values', err)
-
-        logging.basicConfig(level=os.environ.get('LOG_LEVEL', 'INFO'))
-        self.log = logging.getLogger(__name__)
-        self.log.setLevel(logging.INFO)
-        logging.getLogger("botocore").setLevel(logging.WARNING)

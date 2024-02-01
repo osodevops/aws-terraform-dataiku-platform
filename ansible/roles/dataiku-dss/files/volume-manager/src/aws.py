@@ -5,6 +5,8 @@ import botocore
 
 from config import Config
 
+logger = logging.getLogger(__name__)
+
 
 class Aws:
     ec2_client: boto3.client
@@ -79,7 +81,7 @@ class Aws:
         else:
             parameters['MaxResults'] = 100
 
-        logging.debug(f"Getting snapshot with parameters: {parameters}")
+        logger.debug(f"Getting snapshot with parameters: {parameters}")
         try:
             response = self.ec2_client.describe_snapshots(**parameters)
         except botocore.exceptions.ClientError:
@@ -88,16 +90,21 @@ class Aws:
         if not response['Snapshots']:
             return None
 
-        logging.debug(f"Got response {response}")
+        logger.debug(f"Got response {response}")
         return response
 
-    def get_volume_data(self, az, volume_id="", search_tags={}):
+    def get_volume_data(self, az, volume_id="", snapshot_id="", search_tags={}):
         filter_tags = [
             {
                 'Name': 'availability-zone',
                 'Values': [az]
             },
         ]
+        if snapshot_id:
+            filter_tags.append({
+                'Name': "snapshot-id",
+                'Values': [snapshot_id]
+            })
 
         for tag_key, tag_value in search_tags.items():
             if tag_value:
@@ -115,7 +122,7 @@ class Aws:
         else:
             parameters['MaxResults'] = 100
 
-        logging.debug(f"Getting volume with parameters: {parameters}")
+        logger.debug(f"Getting volume with parameters: {parameters}")
 
         try:
             response = self.ec2_client.describe_volumes(**parameters)
@@ -125,7 +132,7 @@ class Aws:
         if not response['Volumes']:
             return None
 
-        logging.debug(f"Got response {response}")
+        logger.debug(f"Got response {response}")
         return response
 
     def delete_volume(self, volume_id):
@@ -133,9 +140,9 @@ class Aws:
             response = self.ec2_client.delete_volume(VolumeId=volume_id)
             return response
         except botocore.exceptions.ClientError as err:
-            logging.warning("Failed to remove old volume.")
+            logger.warning("Failed to remove old volume.")
 
-    def create_volume_from_snapshot(self, az, snapshot_id, instance_id, tags):
+    def set_common_params(self, instance_id, tags, az):
         tag_set = [
             {
                 'Key': 'Instance',
@@ -155,7 +162,6 @@ class Aws:
 
         parameters = {
             'AvailabilityZone': az,
-            'SnapshotId': snapshot_id,
             'VolumeType': self.config.volume_type,
             'Size': int(self.config.volume_size),
             'TagSpecifications': [
@@ -174,53 +180,25 @@ class Aws:
         if self.config.volume_iops:
             parameters['Iops'] = int(self.config.volume_iops)
 
-        logging.debug(f"Getting snapshot with parameters: {parameters}")
+        return parameters
+
+    def create_volume_from_snapshot(self, az, snapshot_id, instance_id, tags):
+        parameters = self.set_common_params(instance_id, tags, az)
+        parameters['SnapshotId'] = snapshot_id
+
+        logger.debug(f"Getting snapshot with parameters: {parameters}")
         response = self.ec2_client.create_volume(**parameters)
 
-        logging.debug(f"Got response {response}")
+        logger.debug(f"Got response {response}")
         return response['VolumeId']
 
     def create_blank_volume(self, az, instance_id, tags):
-        tag_set = [
-            {
-                'Key': 'Instance',
-                'Value': instance_id
-            },
-            {
-                'Key': 'Snapshot',
-                'Value': "true"
-            }
-        ]
-        for tag_key, tag_value in tags.items():
-            if tag_value:
-                tag_set.append({
-                    'Key': tag_key,
-                    'Value': tag_value
-                })
+        parameters = self.set_common_params(instance_id, tags, az)
 
-        parameters = {
-            'AvailabilityZone': az,
-            'Size': int(self.config.volume_size),
-            'VolumeType': self.config.volume_type,
-            'TagSpecifications': [
-                {
-                    'ResourceType': 'volume',
-                    'Tags': tag_set
-                }
-            ]
-        }
-
-        if self.config.encrypt_volumes:
-            parameters['Encrypted'] = self.config.encrypt_volumes
-            parameters['KmsKeyId'] = self.config.kms_key
-
-        if self.config.volume_iops:
-            parameters['Iops'] = int(self.config.volume_iops)
-
-        logging.debug(f"Getting snapshot with parameters: {parameters}")
+        logger.debug(f"Getting snapshot with parameters: {parameters}")
         response = self.ec2_client.create_volume(**parameters)
 
-        logging.debug(f"Got response {response}")
+        logger.debug(f"Got response {response}")
         return response['VolumeId']
 
     def attach_volume(self, instance_id, volume_id):
@@ -229,3 +207,17 @@ class Aws:
             InstanceId=instance_id,
             VolumeId=volume_id
         )
+
+    def match_volume_attachment(self, instance_id, tag_set):
+        instance = self.ec2_client.describe_instances(
+            InstanceIds=[
+                instance_id,
+            ]
+        )
+        az = self.get_az_from_instance(instance_id)
+        for volume in instance['Reservations'][0]['Instances'][0]['BlockDeviceMappings']:
+            data = self.get_volume_data(az=az, volume_id=volume['Ebs']['VolumeId'], search_tags=tag_set)
+            if data and data['Volumes'][0].get('Attachments', False):
+                if data['Volumes'][0]['Attachments'][0]['State'] in ['attaching', 'attached']:
+                    return True
+        return False

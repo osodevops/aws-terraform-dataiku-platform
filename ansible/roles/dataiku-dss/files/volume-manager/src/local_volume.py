@@ -1,3 +1,5 @@
+import sys
+
 import grp
 import logging
 import os
@@ -6,6 +8,8 @@ import subprocess
 
 from config import Config
 from exceptions import VolumeException
+
+logger = logging.getLogger(__name__)
 
 
 class LocalVolume:
@@ -46,7 +50,7 @@ class LocalVolume:
         gid = grp.getgrnam(group).gr_gid
         os.chown(mount_point, uid, gid)
 
-    def unmount(self, mount_point=False):
+    def unmount(self, mount_point=""):
         if not mount_point:
             mount_point = self.config.volume_mount_point
         try:
@@ -54,7 +58,8 @@ class LocalVolume:
                 f"umount {mount_point}", shell=True,
                 check=True, capture_output=True)
         except subprocess.CalledProcessError as err:
-            print(f"Error: Could not unmount the device: {err.output}")
+            logger.critical(f"Error: Could not unmount the device: {err.output}")
+            sys.exit(1)
 
     def _create_fs(self):
         try:
@@ -62,7 +67,8 @@ class LocalVolume:
                 f"mkfs -t {self.fs_type} {self.config.volume_device_name}", shell=True,
                 check=True, capture_output=True)
         except subprocess.CalledProcessError as err:
-            print(f"Error: Could not create filesystem on the device: {err.output}")
+            logger.critical(f"Error: Could not create filesystem on the device: {err.output}")
+            sys.exit(1)
 
     def _populate_filesystem(self):
         try:
@@ -70,7 +76,8 @@ class LocalVolume:
                 f"rsync -avc {self.config.volume_mount_point}/ /mnt", shell=True,
                 check=True, capture_output=True)
         except subprocess.CalledProcessError as err:
-            print(f"Error: Could not copy default files to device: {err.output}")
+            logger.critical(f"Error: Could not copy default files to device: {err.output}")
+            sys.exit(1)
 
     def _resize_xfs(self):
         try:
@@ -78,7 +85,8 @@ class LocalVolume:
                 f"xfs_growfs {self.config.volume_device_name}", shell=True,
                 check=True, capture_output=True)
         except subprocess.CalledProcessError as err:
-            print(f"Error: Could not unmount the device: {err.output}")
+            logger.critical(f"Error: Could not unmount the device: {err.output}")
+            sys.exit(1)
 
     def initialise_filesystem(self):
         if self.blank_fs:
