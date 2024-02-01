@@ -42,7 +42,19 @@ vpc_name = "MY-VPC-NAME"
 ###################################################
 
 # Set the size of the data volume in GB. If you change this value for an existing deployment, only increase it as decreasing will lead to data-loss
-data_volume_size = "1000"
+data_volume_size = "200"
+
+# AWS volume type for the data volume
+data_volume_type = "gp3"
+
+# Specify IOPS for volume types that support it
+data_volume_iops = "1000"
+
+# Where to mount the volume on the OS - Changing this value will require changing related settings in the AMI build
+data_volume_mount_point = "/data"
+
+# Whether to encrypt the volumes with the default KMS key
+data_volume_encrypt = true
 
 # Instance type for the node
 instance_type = "m5.large"
@@ -52,6 +64,13 @@ root_volume_size = "150"
 
 # Optionally specify the name of the pre-existing ssh key to configure on the instance
 ssh_key_name = ""
+
+# Backup the instance via DLM. Specify a tag matching the one defined in "dlm_target_instance_tag" in the "disaster-recovery" wrapper
+dlm_target_instance_tag = "DLMSnapshot"
+
+# Backup the instance via real-time DR mechanism. Specify a tag matching the one defined in "dr_target_instance_tag" in the "disaster-recovery" wrapper
+dr_target_instance_tag = "DRSnapshot"
+
 
 ###################################################
 # ASG configuration
@@ -84,7 +103,7 @@ s3_session_logging_bucket_arn = ""
 # Load-balancer settings
 ###################################################
 
-# Whether to define the load-balancer resources. If set to false, the node will be "headless"
+# Whether to define the load-balancer resources. If set to false, the node will be "headless", and the following "lb_" settings will be ignored
 lb_enable_load_balancer = true
 
 # Additional IP CIDRs to allow access to the load balancer

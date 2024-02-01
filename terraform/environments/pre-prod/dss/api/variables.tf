@@ -52,10 +52,58 @@ variable "common_tags" {
   type        = map(string)
 }
 
+variable "data_volume_device_name" {
+  description = "Name of the device. Generally doesnt need to change"
+  type        = string
+  default     = "/dev/xvdb"
+}
+
+variable "data_volume_encrypt" {
+  description = "Whether to encrypt the volume"
+  type        = bool
+  default     = false
+}
+
+variable "data_volume_iops" {
+  description = "IOPS attributed to the data volume"
+  type        = string
+  default     = "100"
+}
+
+variable "data_volume_kms_key" {
+  description = "Custom KMS key to use"
+  type        = string
+  default     = ""
+}
+
+variable "data_volume_mount_point" {
+  description = "Where on the filesystem the volume is mounted"
+  type        = string
+  default     = "/data"
+}
+
 variable "data_volume_size" {
   description = "Size of the data volume to create or resize in GB"
   type        = string
   default     = "100"
+}
+
+variable "data_volume_type" {
+  description = "Type of data volume to create"
+  type = string
+  default = "gp3"
+}
+
+variable "dlm_target_instance_tag" {
+  description = "Provide a map of tags for the DLM to target."
+  type        = string
+  default     = ""
+}
+
+variable "dr_target_instance_tag" {
+  description = "Provide a single tag for the lambda to target."
+  type        = string
+  default     = ""
 }
 
 variable "dss_node_type" {
@@ -259,32 +307,7 @@ variable "ssh_key_name" {
   default     = null
 }
 
-variable "volume_dynamic_settings_json" {
-  description = ""
-  type        = any
-  default     = {}
-}
-
 variable "vpc_name" {
   description = "Prove the name of the VPC where to deploy dataiku_dss, for exp; PROD-VPC-EUW2"
   type        = string
-}
-
-locals {
-  # Values for the dynamic-settings files common to all node types
-  dynamic_settings_common = {
-    "region" : var.aws_region,
-  }
-
-  # dynamic-settings values specific to the design node
-  api_dynamic_settings_design = merge(local.dynamic_settings_common, var.api_dynamic_settings_json)
-
-  volume_dynamic_settings_json = merge(local.dynamic_settings_common, var.volume_dynamic_settings_json, {
-    "tag_environment" : var.environment,
-    "tag_application" : "Dataiku",
-    "tag_data_volume" : "DataVolume",
-    "tag_node_type" : var.dss_node_type
-    "volume_type" : "gp3",
-    "volume_size" : var.data_volume_size,
-  })
 }

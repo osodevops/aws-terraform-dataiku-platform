@@ -4,12 +4,20 @@ module "dss_design" {
   ami_name_filter               = var.ami_name_filter
   ami_owner_account             = var.ami_owner_account
   asg_desired_capacity          = var.asg_desired_capacity
-  api_dynamic_settings_json     = local.api_dynamic_settings_design
   aws_region                    = var.aws_region
   cloudwatch_alarm_topic_name   = var.cloudwatch_alarm_sns_topic_name
+  data_volume_device_name       = var.data_volume_device_name
+  data_volume_encrypt           = var.data_volume_encrypt
+  data_volume_iops              = var.data_volume_iops
+  data_volume_kms_key           = var.data_volume_kms_key
+  data_volume_mount_point       = var.data_volume_mount_point
+  data_volume_size              = var.data_volume_size
+  data_volume_type              = var.data_volume_type
+  dlm_target_instance_tag       = var.dlm_target_instance_tag
+  dr_target_instance_tag        = var.dr_target_instance_tag
+  dss_node_type                 = var.dss_node_type
   dss_s3_config_bucket          = var.dss_s3_config_bucket
   dss_s3_config_key             = var.dss_s3_config_key
-  dss_node_type                 = var.dss_node_type
   dss_service_port              = var.dss_service_port
   dss_service_protocol          = var.dss_service_protocol
   environment                   = var.environment
@@ -39,8 +47,5 @@ module "dss_design" {
   s3_instance_bucket_name       = var.s3_instance_bucket_name
   s3_session_logging_bucket_arn = var.s3_session_logging_bucket_arn
   ssh_key_name                  = var.ssh_key_name
-
-  volume_dynamic_settings_json = local.volume_dynamic_settings_json
-  vpc_name                     = var.vpc_name
+  vpc_name                      = var.vpc_name
 }
-
