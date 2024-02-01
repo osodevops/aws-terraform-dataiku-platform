@@ -25,20 +25,20 @@ module "backup_volume_s3" {
   })
 
   attach_policy = true
-  policy        = aws_iam_policy.lambda_execution.arn
+  policy        = one(aws_iam_policy.lambda_execution.*.arn)
   publish       = true
 
   allowed_triggers = {
     CloudwatchEvents = {
       principal  = "events.amazonaws.com",
-      source_arn = aws_cloudwatch_event_rule.instance_termination.arn
+      source_arn = one(aws_cloudwatch_event_rule.instance_termination.*.arn)
     }
   }
 }
 
-resource "aws_cloudwatch_event_target" "call_terminator" {
+resource "aws_cloudwatch_event_target" "call_terminator_s3" {
   count           = var.enable && var.lambda_deploy_option == "S3" ? 1 : 0
-  rule      = aws_cloudwatch_event_rule.instance_termination.*.name
+  rule      = one(aws_cloudwatch_event_rule.instance_termination.*.name)
   target_id = "instanceTerminator"
-  arn       = module.backup_volume_s3.*.lambda_function_arn
+  arn       = one(module.backup_volume_s3.*.lambda_function_arn)
 }

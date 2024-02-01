@@ -19,7 +19,7 @@ dlm_enable_policy = true
 dlm_retain_snapshot_count = 7
 
 # Name for the policy
-dlm_schedule_name = "1 week of daily snapshots"
+dlm_schedule_name = "1-week-of-daily-snapshots"
 
 # Time in 24 hour notation for the snapshot policy to be evaluated
 dlm_snapshot_time = "23:00"
@@ -46,7 +46,7 @@ dr_lambda_log_level = "INFO"
 
 # Bucket and key for the S3 lambda option. Ignored in the case of BUILD
 dr_source_s3_bucket_name = "NAME-OF-AN-S3-BUCKET"
-dr_source_s3_bucket_key = "KEY-OF-BUILT-LAMBDA-SOURCE"
+dr_source_s3_bucket_key  = "KEY-OF-BUILT-LAMBDA-SOURCE"
 
 # Any volume containing this tag will be selected for instant snapshot when an instance is terminated. Value on the instance must be "true"
 dr_target_instance_tag = "DRSnapshot"

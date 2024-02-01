@@ -5,7 +5,7 @@ terraform {
     bucket         = "MY-BUCKET-NAME"
     dynamodb_table = "MY-DYNAMODB-LOCKING-TABLE-tf-state-lock"
     region         = "MY-AWS-REGION"
-    key            = "dss/common/disaster-recovery/terraform.tfstate"
+    key            = "dss/common/iam/terraform.tfstate"
     encrypt        = true
   }
 

@@ -1,5 +1,5 @@
 resource "aws_iam_role" "dlm_lifecycle_role" {
-  name = "dlm-${var.schedule_name}"
+  name = var.schedule_name
 
   assume_role_policy = <<EOF
 {
