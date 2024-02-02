@@ -28,14 +28,14 @@ data "aws_iam_policy_document" "dss_assume_role" {
 }
 
 resource "aws_iam_policy" "dss_instance_s3" {
-  count = var.s3_allow_instance_bucket ? 1 : 0
+  count       = var.s3_allow_instance_bucket ? 1 : 0
   name        = "${local.resource_title}-instance-s3"
   description = "Policy for DSS instance S3 interactions"
   policy      = data.aws_iam_policy_document.dss_instance_s3.*.json
 }
 
 resource "aws_iam_role_policy_attachment" "dss_instance_s3" {
-  count = var.s3_allow_instance_bucket ? 1 : 0
+  count      = var.s3_allow_instance_bucket ? 1 : 0
   role       = aws_iam_role.dss.name
   policy_arn = aws_iam_policy.dss_instance_s3.*.arn
 }
@@ -71,16 +71,16 @@ data "aws_iam_policy_document" "dss_instance_s3" {
 }
 
 resource "aws_iam_policy" "dss_instance_session" {
-  count = var.s3_session_logging_bucket_arn != "" ? 1 : 0
+  count       = var.s3_session_logging_bucket_arn != "" ? 1 : 0
   name        = "${local.resource_title}-instance-session-logs"
   description = "Policy for DSS instance Session logging"
-  policy      = data.aws_iam_policy_document.dss_instance_session.*.json
+  policy      = one(data.aws_iam_policy_document.dss_instance_session.*.json)
 }
 
 resource "aws_iam_role_policy_attachment" "dss_instance_session" {
-  count = var.s3_session_logging_bucket_arn != "" ? 1 : 0
+  count      = var.s3_session_logging_bucket_arn != "" ? 1 : 0
   role       = aws_iam_role.dss.name
-  policy_arn = aws_iam_policy.dss_instance_session.*.arn
+  policy_arn = one(aws_iam_policy.dss_instance_session.*.arn)
 }
 
 data "aws_iam_policy_document" "dss_instance_session" {
@@ -244,8 +244,8 @@ data "aws_iam_policy_document" "dss_instance_general" {
   }
 
   statement {
-    sid    = "ElasticLoadBalancer"
-    effect = "Allow"
+    sid     = "ElasticLoadBalancer"
+    effect  = "Allow"
     actions = [
       "elasticloadbalancing:DescribeLoadBalancers"
     ]

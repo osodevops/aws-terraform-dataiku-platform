@@ -148,12 +148,6 @@ variable "instance_type" {
   default = "m5.large"
 }
 
-variable "lb_additional_security_groups" {
-  description = "List of additional security groups to allow access to the load balancer"
-  type = list(string)
-  default = []
-}
-
 variable "lb_allowed_ips" {
   description = "List of external IP ranges allowed access to the dataiku_dss ALB"
   type        = list(string)
@@ -350,7 +344,6 @@ locals {
     "dss_config_s3_key": var.dss_s3_config_key,
   }
   asg_tags = concat(
-    null_resource.asg_tags[*].triggers,
     [
       { key : "Name", value : local.resource_title, propagate_at_launch : true },
       { key : "AWSInspectorEnabled", value : "true" },

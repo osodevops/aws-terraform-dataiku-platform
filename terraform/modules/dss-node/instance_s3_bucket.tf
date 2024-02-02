@@ -1,10 +1,10 @@
 module "s3_bucket_staging" {
   count = var.s3_create_instance_bucket ? 1 : 0
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "~> 3.4"
+  version = "~> 4.1"
 
   bucket = var.s3_instance_bucket_name
-  acl    = "private"
+  # acl    = "private"
 
   # Bucket policies
   attach_policy = false

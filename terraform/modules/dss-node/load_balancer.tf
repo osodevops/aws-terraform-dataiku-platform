@@ -1,14 +1,14 @@
 data "aws_elb_service_account" "main" {}
 
 data "aws_iam_policy_document" "alb_access_logs" {
-  count             = var.lb_enable_load_balancer ? 1 : 0
+  count = var.lb_enable_load_balancer ? 1 : 0
   statement {
     actions = [
       "s3:PutObject",
     ]
 
     resources = [
-      "${module.alb_access_logs.s3_bucket_arn}/*",
+      "${one(module.lb_access_logs.*.s3_bucket_arn)}/*",
     ]
 
     principals {
@@ -20,7 +20,7 @@ data "aws_iam_policy_document" "alb_access_logs" {
 
 resource "aws_alb_listener" "http" {
   count             = var.lb_enable_load_balancer ? 1 : 0
-  load_balancer_arn = aws_alb.dataiku_dss.*.id
+  load_balancer_arn = one(aws_alb.dataiku_dss.*.id)
   port              = var.lb_http_port
   protocol          = "HTTP"
 
@@ -40,10 +40,10 @@ resource "aws_alb_listener" "https" {
   count = var.lb_enable_load_balancer ? 1 : 0
   default_action {
     type             = "forward"
-    target_group_arn = aws_alb_target_group.tg.*.id
+    target_group_arn = one(aws_alb_target_group.tg.*.id)
   }
 
-  load_balancer_arn = aws_alb.dataiku_dss.*.id
+  load_balancer_arn = one(aws_alb.dataiku_dss.*.id)
   port              = var.lb_https_port
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-TLS-1-2-Ext-2018-06"
@@ -58,7 +58,7 @@ resource "aws_alb_target_group" "tg" {
   name     = "${local.resource_title}-dss-ui-alb"
   port     = var.dss_service_port
   protocol = var.dss_service_protocol
-  vpc_id   = data.aws_vpc.dataiku_dss.*.id
+  vpc_id   = one(data.aws_vpc.dataiku_dss.*.id)
 
   health_check {
     interval            = 30
@@ -88,12 +88,12 @@ resource "aws_alb" "dataiku_dss" {
   internal                   = var.lb_internal
   enable_deletion_protection = var.lb_enable_deletion_protection
   security_groups            = [
-    aws_security_group.lb.*.id
+    one(aws_security_group.lb.*.id)
   ]
   idle_timeout = 600
 
   access_logs {
-    bucket  = module.lb_access_logs.s3_bucket_id
+    bucket  = one(module.lb_access_logs.*.s3_bucket_id)
     prefix  = var.lb_logs_s3_prefix
     enabled = var.lb_logs_s3_enabled
   }
@@ -110,8 +110,8 @@ resource "aws_alb" "dataiku_dss" {
 
 resource "aws_autoscaling_attachment" "http_ui_port" {
   count                  = var.lb_enable_load_balancer ? 1 : 0
-  autoscaling_group_name = aws_autoscaling_group.dataiku_dss.*.id
-  lb_target_group_arn    = aws_alb_target_group.tg.*.arn
+  autoscaling_group_name = one(aws_autoscaling_group.dataiku_dss.*.id)
+  lb_target_group_arn    = one(aws_alb_target_group.tg.*.arn)
 }
 
 resource "aws_security_group" "lb" {
@@ -119,63 +119,64 @@ resource "aws_security_group" "lb" {
   description = "dataiku_dss UI - Managed by Terraform"
   name        = "${local.resource_title}-dss-lb"
   vpc_id      = data.aws_vpc.dataiku_dss.id
-  tags = {
+  tags        = {
     "Name" : "${local.resource_title}-dss-alb"
   }
 }
 
 resource "aws_vpc_security_group_ingress_rule" "http_in" {
-  security_group_id = aws_security_group.lb.*.id
-  description = "Allow HTTP inbound from external CIDRs"
-  from_port   = var.lb_http_port
-  to_port     = var.lb_http_port
-  ip_protocol = "tcp"
-  cidr_ipv4 = var.lb_allowed_ips
+  count             = length(var.lb_allowed_ips)
+  security_group_id = one(aws_security_group.lb.*.id)
+  description       = "Allow HTTP inbound from external CIDRs"
+  from_port         = var.lb_http_port
+  to_port           = var.lb_http_port
+  ip_protocol       = "tcp"
+  cidr_ipv4         = element(var.lb_allowed_ips, count.index)
 }
 
 resource "aws_vpc_security_group_ingress_rule" "https_in" {
-  security_group_id = aws_security_group.lb.*.id
-  description = "Allow HTTPS inbound from external CIDRs"
-  from_port   = var.lb_https_port
-  to_port     = var.lb_https_port
-  ip_protocol = "tcp"
-  cidr_ipv4 = var.lb_allowed_ips
+  count             = length(var.lb_allowed_ips)
+  security_group_id = one(aws_security_group.lb.*.id)
+  description       = "Allow HTTPS inbound from external CIDR"
+  from_port         = var.lb_https_port
+  to_port           = var.lb_https_port
+  ip_protocol       = "tcp"
+  cidr_ipv4         = element(var.lb_allowed_ips, count.index)
 }
 
 resource "aws_vpc_security_group_ingress_rule" "additional_sg_access" {
-  count = length(var.lb_additional_security_groups)
-  security_group_id = aws_security_group.lb.*.id
-  description = "Allow other nodes in on HTTPS, identified by a specific security group"
-  from_port   = var.lb_https_port
-  to_port     = var.lb_https_port
-  ip_protocol = "tcp"
+  count                        = length(var.lb_allow_security_groups)
+  security_group_id            = one(aws_security_group.lb.*.id)
+  description                  = "Allow other nodes in on HTTPS, identified by a specific security group"
+  from_port                    = var.lb_https_port
+  to_port                      = var.lb_https_port
+  ip_protocol                  = "tcp"
   referenced_security_group_id = data.aws_security_group.external_node_sg[count.index].id
 }
 
 resource "aws_vpc_security_group_egress_rule" "default_out" {
-  security_group_id = aws_security_group.lb.*.id
-  description = "Allow all outbound traffic"
-  cidr_blocks = ["0.0.0.0/0"]
-  ip_protocol = "-1"
+  security_group_id = one(aws_security_group.lb.*.id)
+  description       = "Allow all outbound traffic"
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
 }
 
 
 module "lb_access_logs" {
   count         = var.lb_enable_load_balancer ? 1 : 0
   source        = "terraform-aws-modules/s3-bucket/aws"
-  version       = "~> 3.0"
+  version       = "~> 4.1"
   bucket        = var.lb_log_s3_bucket_name
-  acl           = "log-delivery-write"
-  force_destroy = false
 
-  versioning = {
-    enabled = false
-  }
+  acl    = "log-delivery-write"
 
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+  # Allow deletion of non-empty bucket
+  force_destroy = true
+
+  control_object_ownership = true
+  object_ownership         = "ObjectWriter"
+
+  attach_elb_log_delivery_policy = true
 
   tags = {
     "Name" : var.lb_log_s3_bucket_name
@@ -184,17 +185,12 @@ module "lb_access_logs" {
 
 resource "aws_s3_bucket_policy" "alb_access_logs" {
   count  = var.lb_enable_load_balancer ? 1 : 0
-  bucket = module.lb_access_logs.*.s3_bucket_id
-  policy = data.aws_iam_policy_document.alb_access_logs.json
+  bucket = one(module.lb_access_logs.*.s3_bucket_id)
+  policy = one(data.aws_iam_policy_document.alb_access_logs.*.json)
 
   depends_on = [module.lb_access_logs]
 }
 
-resource "aws_autoscaling_attachment" "http_ui_port" {
-  count                  = var.lb_enable_load_balancer ? 1 : 0
-  autoscaling_group_name = aws_autoscaling_group.dataiku_dss.id
-  lb_target_group_arn    = aws_alb_target_group.tg.*.arn
-}
 
 resource "aws_cloudwatch_metric_alarm" "dataiku_dss_alb_unhealthy_hosts" {
   count               = var.lb_enable_load_balancer ? 1 : 0
@@ -208,8 +204,8 @@ resource "aws_cloudwatch_metric_alarm" "dataiku_dss_alb_unhealthy_hosts" {
   metric_name         = "UnHealthyHostCount"
   statistic           = "Average"
   dimensions          = {
-    LoadBalancer = aws_alb.dataiku_dss.*.arn_suffix
-    TargetGroup  = aws_alb_target_group.tg.*.arn_suffix
+    LoadBalancer = one(aws_alb.dataiku_dss.*.arn_suffix)
+    TargetGroup  = one(aws_alb_target_group.tg.*.arn_suffix)
   }
   alarm_actions = [data.aws_sns_topic.topic.arn]
 }

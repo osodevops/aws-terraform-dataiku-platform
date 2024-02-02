@@ -7,8 +7,8 @@ resource "aws_route53_record" "public" {
 
   alias {
     evaluate_target_health = false
-    name                   = aws_alb.dataiku_dss.*.dns_name
-    zone_id                = aws_alb.dataiku_dss.*.zone_id
+    name                   = one(aws_alb.dataiku_dss.*.dns_name)
+    zone_id                = one(aws_alb.dataiku_dss.*.zone_id)
   }
 }
 resource "aws_route53_record" "private" {
@@ -20,7 +20,7 @@ resource "aws_route53_record" "private" {
 
   alias {
     evaluate_target_health = false
-    name                   = aws_alb.dataiku_dss.*.dns_name
-    zone_id                = aws_alb.dataiku_dss.*.zone_id
+    name                   = one(aws_alb.dataiku_dss.*.dns_name)
+    zone_id                = one(aws_alb.dataiku_dss.*.zone_id)
   }
 }
