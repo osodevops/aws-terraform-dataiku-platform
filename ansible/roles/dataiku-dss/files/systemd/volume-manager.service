@@ -6,10 +6,10 @@ ConditionPathExists=!/var/run/volume-manager.lock
 
 [Service]
 Type=oneshot
-Environment=PYTHONPATH=/opt/dataiku-python
+Environment=PYTHONPATH=/opt/dataiku-python/volume_manager
 ExecStartPre=/bin/touch /var/run/volume-manager.lock
-WorkingDirectory=/opt/dataiku-python/volume-manager
-ExecStart=/bin/python3 /opt/dataiku-python/volume-manager/main.py
+WorkingDirectory=/opt/dataiku-python/volume_manager
+ExecStart=/bin/python3 /opt/dataiku-python/volume_manager/main.py
 StandardOutput=journal
 SyslogIdentifier=volume-manager
 

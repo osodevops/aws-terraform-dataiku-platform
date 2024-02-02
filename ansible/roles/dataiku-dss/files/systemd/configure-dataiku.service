@@ -7,8 +7,8 @@ ConditionPathExists=!/var/run/configure-dataiku.lock
 Type=oneshot
 Environment=PYTHONPATH=/opt/dataiku-python
 ExecStartPre=/bin/touch /var/run/configure-dataiku.lock
-WorkingDirectory=/opt/dataiku-python/dataiku-configurator
-ExecStart=/bin/python3 /opt/dataiku-python/dataiku-configurator/main.py
+WorkingDirectory=/opt/dataiku-python/dataiku_api_manager
+ExecStart=/bin/python3 /opt/dataiku-python/dataiku_api_manager/main.py
 StandardOutput=journal
 SyslogIdentifier=configure-dataiku
 
