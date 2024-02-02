@@ -15,7 +15,7 @@ def string_to_bool(data):
 class Config:
     def __init__(self):
         try:
-            dynamic_config = DynamicConfig("/opt/dataiku-python/volume-manager/dynamic-settings.json")
+            dynamic_config = DynamicConfig("/opt/dataiku-python/volume_manager/dynamic-settings.json")
 
             region = dynamic_config.get('region')
 
