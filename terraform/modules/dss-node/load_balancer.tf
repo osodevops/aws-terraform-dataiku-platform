@@ -1,22 +1,22 @@
 data "aws_elb_service_account" "main" {}
 
-data "aws_iam_policy_document" "alb_access_logs" {
-  count = var.lb_enable_load_balancer ? 1 : 0
-  statement {
-    actions = [
-      "s3:PutObject",
-    ]
-
-    resources = [
-      "${one(module.lb_access_logs.*.s3_bucket_arn)}/*",
-    ]
-
-    principals {
-      identifiers = [data.aws_elb_service_account.main.arn]
-      type        = "AWS"
-    }
-  }
-}
+#data "aws_iam_policy_document" "alb_access_logs" {
+#  count = var.lb_enable_load_balancer ? 1 : 0
+#  statement {
+#    actions = [
+#      "s3:PutObject",
+#    ]
+#
+#    resources = [
+#      "${one(module.lb_access_logs.*.s3_bucket_arn)}/*",
+#    ]
+#
+#    principals {
+#      identifiers = [data.aws_elb_service_account.main.arn]
+#      type        = "AWS"
+#    }
+#  }
+#}
 
 resource "aws_alb_listener" "http" {
   count             = var.lb_enable_load_balancer ? 1 : 0
@@ -161,7 +161,6 @@ resource "aws_vpc_security_group_egress_rule" "default_out" {
   ip_protocol       = "-1"
 }
 
-
 module "lb_access_logs" {
   count         = var.lb_enable_load_balancer ? 1 : 0
   source        = "terraform-aws-modules/s3-bucket/aws"
@@ -182,15 +181,6 @@ module "lb_access_logs" {
     "Name" : var.lb_log_s3_bucket_name
   }
 }
-
-resource "aws_s3_bucket_policy" "alb_access_logs" {
-  count  = var.lb_enable_load_balancer ? 1 : 0
-  bucket = one(module.lb_access_logs.*.s3_bucket_id)
-  policy = one(data.aws_iam_policy_document.alb_access_logs.*.json)
-
-  depends_on = [module.lb_access_logs]
-}
-
 
 resource "aws_cloudwatch_metric_alarm" "dataiku_dss_alb_unhealthy_hosts" {
   count               = var.lb_enable_load_balancer ? 1 : 0

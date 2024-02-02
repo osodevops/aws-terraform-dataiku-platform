@@ -349,6 +349,7 @@ locals {
       { key : "AWSInspectorEnabled", value : "true" },
       { key : "Environment", value : var.environment, propagate_at_launch : true },
       { key : "DssNode", value : var.dss_node_type, propagate_at_launch : true },
+      { key : "Application", value : "Dataiku", propagate_at_launch : true },
       { key : var.dlm_target_instance_tag == "" ? "noDlm" : var.dlm_target_instance_tag, value : "True", propagate_at_launch : true },
       { key : var.dr_target_instance_tag == "" ? "noDr" : var.dr_target_instance_tag, value : "True", propagate_at_launch : true },
 
