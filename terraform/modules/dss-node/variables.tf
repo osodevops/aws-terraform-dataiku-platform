@@ -17,8 +17,8 @@ variable "api_dynamic_settings_json" {
 
 variable "asg_desired_capacity" {
   description = "The number of instances for the ASG to create"
-  type    = number
-  default = 1
+  type        = number
+  default     = 1
 }
 
 variable "asg_max_size" {
@@ -91,18 +91,20 @@ variable "data_volume_size" {
 
 variable "data_volume_type" {
   description = "Type of data volume to create"
-  type = string
-  default = "gp3"
+  type        = string
+  default     = "gp3"
 }
 
 variable "dss_s3_config_bucket" {
   description = "Bucket name where the DSS config is stored"
-  type = string
+  type        = string
+  default     = ""
 }
 
 variable "dss_s3_config_key" {
   description = "Key of the config file to use for this node"
-  type = string
+  type        = string
+  default     = ""
 }
 
 variable "dss_node_type" {
@@ -122,8 +124,8 @@ variable "dss_service_port" {
 
 variable "dss_service_protocol" {
   description = "Is DSS operating in HTTP or HTTPS mode"
-  type    = string
-  default = "HTTP"
+  type        = string
+  default     = "HTTP"
 }
 
 variable "encrypt_ebs" {
@@ -156,8 +158,8 @@ variable "lb_allowed_ips" {
 
 variable "lb_allow_security_groups" {
   description = "List of additional security group names (not IDs) to allow access to the load balancer"
-  type = list(string)
-  default = []
+  type        = list(string)
+  default     = []
 }
 
 variable "lb_certificate_arn" {
@@ -174,8 +176,8 @@ variable "lb_enable_load_balancer" {
 
 variable "lb_enable_deletion_protection" {
   description = "Prevent tear-down of the ALB without a force"
-  type    = bool
-  default = false
+  type        = bool
+  default     = false
 }
 
 variable "lb_health_check_response_code" {
@@ -238,8 +240,8 @@ variable "lb_log_s3_bucket_name" {
 
 variable "node_name" {
   description = "Optionally provide an explicit node name that will be used for naming resources"
-  type = string
-  default = ""
+  type        = string
+  default     = ""
 }
 
 variable "private_subnet_name_filter" {
@@ -329,19 +331,19 @@ locals {
   volume_dynamic_settings_json = merge(var.volume_dynamic_settings_json, {
     "region" : var.aws_region,
     "volume_type" : var.data_volume_type,
-    "volume_iops": var.data_volume_iops,
+    "volume_iops" : var.data_volume_iops,
     "volume_size" : var.data_volume_size,
-    "mount_point": var.data_volume_mount_point,
-    "encrypt_volumes": var.data_volume_encrypt ? "true" : "false",
-    "kms_key": var.data_volume_kms_key,
-    "device_name": var.data_volume_device_name,
+    "mount_point" : var.data_volume_mount_point,
+    "encrypt_volumes" : var.data_volume_encrypt ? "true" : "false",
+    "kms_key" : var.data_volume_kms_key,
+    "device_name" : var.data_volume_device_name,
   })
 
   system_settings_json = {
-    "aws_region": var.aws_region,
-    "node_type": var.dss_node_type,
-    "dss_config_s3_bucket": var.dss_s3_config_bucket,
-    "dss_config_s3_key": var.dss_s3_config_key,
+    "aws_region" : var.aws_region,
+    "node_type" : var.dss_node_type,
+    "dss_config_s3_bucket" : var.dss_s3_config_bucket,
+    "dss_config_s3_key" : var.dss_s3_config_key,
   }
   asg_tags = concat(
     [
@@ -350,8 +352,14 @@ locals {
       { key : "Environment", value : var.environment, propagate_at_launch : true },
       { key : "DssNode", value : var.dss_node_type, propagate_at_launch : true },
       { key : "Application", value : "Dataiku", propagate_at_launch : true },
-      { key : var.dlm_target_instance_tag == "" ? "noDlm" : var.dlm_target_instance_tag, value : "True", propagate_at_launch : true },
-      { key : var.dr_target_instance_tag == "" ? "noDr" : var.dr_target_instance_tag, value : "True", propagate_at_launch : true },
+      {
+        key : var.dlm_target_instance_tag == "" ? "noDlm" : var.dlm_target_instance_tag, value : "True",
+        propagate_at_launch : true
+      },
+      {
+        key : var.dr_target_instance_tag == "" ? "noDr" : var.dr_target_instance_tag, value : "True",
+        propagate_at_launch : true
+      },
 
     ])
 }

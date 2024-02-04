@@ -70,6 +70,42 @@ data "aws_iam_policy_document" "dss_instance_s3" {
   }
 }
 
+resource "aws_iam_policy" "dss_config_s3" {
+  count       = var.dss_s3_config_bucket !="" ? 1 : 0
+  name        = "${local.resource_title}-config-s3"
+  description = "Policy for DSS instance S3 interactions for config"
+  policy      = one(data.aws_iam_policy_document.dss_config_s3.*.json)
+}
+
+resource "aws_iam_role_policy_attachment" "dss_config_s3" {
+  count       = var.dss_s3_config_bucket !="" ? 1 : 0
+  role       = aws_iam_role.dss.name
+  policy_arn = one(aws_iam_policy.dss_config_s3.*.arn)
+}
+
+data "aws_iam_policy_document" "dss_config_s3" {
+  count       = var.dss_s3_config_bucket !="" ? 1 : 0
+  statement {
+    sid    = "S3BucketConfigAccess"
+    effect = "Allow"
+
+    actions = [
+      "s3:ListBucket",
+      "s3:HeadBucket",
+      "s3:ListObjects",
+      "s3:GetObject",
+      "s3:GetObjectTagging",
+      "s3:GetBucketLocation",
+      "s3:GetEncryptionConfiguration",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.dss_s3_config_bucket}",
+      "arn:aws:s3:::${var.dss_s3_config_bucket}/*"
+    ]
+  }
+}
+
 resource "aws_iam_policy" "dss_instance_session" {
   count       = var.s3_session_logging_bucket_arn != "" ? 1 : 0
   name        = "${local.resource_title}-instance-session-logs"

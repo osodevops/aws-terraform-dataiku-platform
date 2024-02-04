@@ -1,0 +1,66 @@
+{
+  "dss": {
+    "endpoint_url": {"backend_provider": "environment", "env_var": "DATAIKU_API_ENDPOINT", "default": "http://localhost:11200"},
+    "admin_key": {"backend_provider": "environment", "env_var": "DATAIKU_API_TOKEN", "default": ""},
+    "admin_user": "admin",
+    "deployment_path": "/data/dataiku",
+    "os_user": "dataiku"
+  },
+
+  "set_user_profile": {
+    "user": "admin",
+    "profile": "DESIGNER"
+  },
+
+  "set_admin_password": {
+    "user": "admin",
+    "password": "dummy"
+  },
+
+  "update_license": {
+    "license": {"backend_provider": "parameter_store", "path": "/dataiku/dummy_license"}
+  },
+
+  "install_ini_settings": {
+    "automation": {
+      "inipath": "/data/dataiku/install.ini",
+      "inicontents": {
+        "javaopts": {
+          "backend.xmx": "2g"
+        }
+      }
+    },
+    "design": {
+      "inipath": "/data/dataiku/install.ini",
+      "inicontents": {
+        "javaopts": {
+          "backend.xmx": "2g"
+        }
+      }
+    },
+    "api": {
+      "inipath": "/data/dataiku/install.ini",
+      "inicontents": {
+        "javaopts": {
+          "backend.xmx": "2g"
+        }
+      }
+    }
+  },
+
+  "cgroups": {
+    "cgroup_limits": [
+      {
+        "key": "memory.limit_in_bytes",
+        "value": "95g"
+      }
+    ]
+  },
+
+  "global_variables": {
+    "variables": {
+      "default": "default"
+    }
+  }
+
+}
