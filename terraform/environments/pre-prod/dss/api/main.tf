@@ -1,6 +1,5 @@
 module "dss_api" {
   source                        = "../../../../modules/dss-node"
-  additional_security_groups    = var.additional_security_groups
   ami_name_filter               = var.ami_name_filter
   ami_owner_account             = var.ami_owner_account
   asg_desired_capacity          = var.asg_desired_capacity
