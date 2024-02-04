@@ -17,11 +17,10 @@ class Config(JsonParser):
     ]
 
     def get_dss_auth_settings(self):
-        data = self.data["dss"]
-        deployed_path = data['deployment_path']
-        user = data['admin_user']
+        deployed_path = self['dss'].get('deployment_path')
+        user = self["dss"].get('admin_user')
 
-        if not data["admin_key"]:
+        if not user:
             token = ""
             try:
                 dsscli_output = subprocess.run(
@@ -36,16 +35,16 @@ class Config(JsonParser):
                 logger.critical(f"Error: Could not get the api keys via dsscli: {err.output}")
             except (KeyError, json.JSONDecodeError):
                 logger.critical(f"Error: Could read Json key response")
-            self.data["dss_auth"]["admin_key"] = token
+            self.data["dss"]["admin_key"] = token
 
     def initialize_backend_settings(self):
         self.vault_settings = {
-            "vault_role": self.data['dss'].get('vault_role'),
-            "vault_endpoint":  self.data['dss'].get('vault_endpoint'),
-            "vault_skip_tls": self.data['dss'].get('vault_skip_tls'),
-            "vault_path": self.data['dss'].get('vault_auth_path'),
-            "vault_os_nonce_path": self.data['dss'].get('vault_os_nonce_path'),
-            "vault_mock_endpoint": self.data['dss'].get('vault_mock_endpoint'),
-            "vault_auth_method": self.data['dss'].get('vault_auth_method'),
-            "vault_auth_token": self.data['dss'].get('vault_auth_token')
+            "vault_role": self['dss'].get('vault_role'),
+            "vault_endpoint":  self['dss'].get('vault_endpoint'),
+            "vault_skip_tls": self['dss'].get('vault_skip_tls'),
+            "vault_path": self['dss'].get('vault_auth_path'),
+            "vault_os_nonce_path": self['dss'].get('vault_os_nonce_path'),
+            "vault_mock_endpoint": self['dss'].get('vault_mock_endpoint'),
+            "vault_auth_method": self['dss'].get('vault_auth_method'),
+            "vault_auth_token": self['dss'].get('vault_auth_token')
         }

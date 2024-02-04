@@ -19,7 +19,6 @@ class JsonParser:
     vault_settings = {}
     aws_handler: [AwsHelper, None]
     aws_settings = {}
-    aws: AwsHelper
     data = {}
     valid_keys = []
     use_when = False
@@ -36,7 +35,7 @@ class JsonParser:
             return self._parse_config(self.data.get(key))
         return self.data.get(key)
 
-    def __init__(self, aws_region="", data=None, valid_keys=None, use_when=False):
+    def __init__(self, aws_region="", data=None, valid_keys=None, use_when=False, sub_categories=[], my_category=""):
         if aws_region:
             self.aws_settings = {"aws_region": aws_region}
         if valid_keys:
@@ -45,6 +44,10 @@ class JsonParser:
             self.use_when = use_when
         if data:
             self.data = data
+        if sub_categories:
+            self.valid_sub_categories = sub_categories
+        if my_category:
+            self.my_sub_category = my_category
 
         self.vault_handler = None
         self.aws_handler = None
@@ -123,11 +126,11 @@ class JsonParser:
 
         while attempt < max_attempts:
             attempt += 1
-            if self.aws.get_parameter(config.get("path"), True):
+            if self.aws_handler.get_parameter(config.get("path"), True):
                 break
             time.sleep(5)
 
-        return self.aws.get_parameter(config.get("path"), True)['Parameter']['Value']
+        return self.aws_handler.get_parameter(config.get("path"), True)['Parameter']['Value']
 
     @staticmethod
     def _get_backend_data_file(config):

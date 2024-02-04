@@ -23,7 +23,7 @@ class InstallIni:
         self.dataiku.regenerate_config()
         self.dataiku.start_dss_service()
 
-    def set_configuration(self) :
+    def set_configuration(self):
         parser = configparser.ConfigParser()
         parser.read(self.path)
         for key, value in self.data.items():

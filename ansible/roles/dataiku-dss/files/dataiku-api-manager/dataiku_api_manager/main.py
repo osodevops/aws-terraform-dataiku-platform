@@ -14,16 +14,20 @@ def main():
         aws_region="eu-west-2",
         node_type="design",
         system_json_file="./system-settings.json",
-        dss_config_file="",
-        dss_config_s3_bucket="",
-        dss_config_s3_key="",
-        dss_config_s3_bucket_tag="ConfigS3Bucket",
-        dss_config_s3_key_tag="ConfigS3Key",
+        # dss_config_file="",
+        # dss_config_s3_bucket="",
+        # dss_config_s3_key="",
+        # dss_config_s3_bucket_tag="ConfigS3Bucket",
+        # dss_config_s3_key_tag="ConfigS3Key",
         dss_node_type_tag="DssType"
     )
 
     system_config.load_system_config()
-    dss_config = Config(aws_region=system_config.aws_settings["aws_region"])
+    dss_config = Config(
+        aws_region=system_config.aws_settings["aws_region"],
+        sub_categories=['api', 'design', 'automation'],
+        my_category=system_config.node_type
+    )
     dss_config.load_data(system_config.get_config_data())
     dss_config.initialize_backend_settings()
 

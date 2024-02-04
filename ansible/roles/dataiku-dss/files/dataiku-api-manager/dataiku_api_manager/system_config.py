@@ -22,6 +22,7 @@ class SystemConfig:
     dss_node_type_tag: str
     instance_id: str
     tags: dict
+    valid_keys: list
 
     def __init__(self, aws_region="", system_json_file="", dss_config_file="", dss_config_s3_bucket="",
                  dss_config_s3_key="", dss_config_s3_bucket_tag="", dss_config_s3_key_tag="", node_type="",
@@ -40,6 +41,8 @@ class SystemConfig:
         self.system_json_file = system_json_file
         self.instance_id = ""
         self.tags = {}
+        self.valid_keys = ['aws_region', 'aws_settings', 'node_type', 'dss_config_file', 'dss_config_s3_bucket', 'dss_config_s3_key',
+                           'dss_config_s3_bucket_tag', 'dss_config_s3_key_tag', 'dss_node_type_tag']
 
     @aws_provider
     def _get_instance_tag(self, search_tag, default=""):
@@ -63,10 +66,8 @@ class SystemConfig:
             with open(self.system_json_file, 'r') as f:
                 data = json.loads(f.read())
             for key, value in data.items():
-                if key in ['aws_settings', 'node_type', 'dss_config_file', 'dss_config_s3_bucket', 'dss_config_s3_key',
-                           'dss_config_s3_bucket_tag', 'dss_config_s3_key_tag', 'dss_node_type_tag']:
-                    if not getattr(self, key):
-                        setattr(self, key, value)
+                if key in self.valid_keys:
+                    setattr(self, key, value)
                 else:
                     logger.critical(f"System config file contained invalid key: {key}")
 
