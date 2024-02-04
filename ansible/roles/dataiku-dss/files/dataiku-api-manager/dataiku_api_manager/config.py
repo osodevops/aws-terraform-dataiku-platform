@@ -20,7 +20,7 @@ class Config(JsonParser):
         deployed_path = self['dss'].get('deployment_path')
         user = self["dss"].get('admin_user')
 
-        if not user:
+        if not self["dss"].get('admin_key'):
             token = ""
             try:
                 dsscli_output = subprocess.run(
