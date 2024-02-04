@@ -1,23 +1,5 @@
 data "aws_elb_service_account" "main" {}
 
-#data "aws_iam_policy_document" "alb_access_logs" {
-#  count = var.lb_enable_load_balancer ? 1 : 0
-#  statement {
-#    actions = [
-#      "s3:PutObject",
-#    ]
-#
-#    resources = [
-#      "${one(module.lb_access_logs.*.s3_bucket_arn)}/*",
-#    ]
-#
-#    principals {
-#      identifiers = [data.aws_elb_service_account.main.arn]
-#      type        = "AWS"
-#    }
-#  }
-#}
-
 resource "aws_alb_listener" "http" {
   count             = var.lb_enable_load_balancer ? 1 : 0
   load_balancer_arn = one(aws_alb.dataiku_dss.*.id)
@@ -92,10 +74,13 @@ resource "aws_alb" "dataiku_dss" {
   ]
   idle_timeout = 600
 
-  access_logs {
-    bucket  = one(module.lb_access_logs.*.s3_bucket_id)
-    prefix  = var.lb_logs_s3_prefix
-    enabled = var.lb_logs_s3_enabled
+  dynamic "access_logs" {
+    for_each = var.lb_log_s3_bucket_name != "" ? toset([]) : toset([1])
+    content {
+      bucket  = var.lb_log_s3_bucket_name != "" ? one(module.lb_access_logs.*.s3_bucket_id) : "dummy"
+      prefix  = var.lb_logs_s3_prefix
+      enabled = var.lb_logs_s3_enabled
+    }
   }
 
   tags = {
@@ -162,7 +147,7 @@ resource "aws_vpc_security_group_egress_rule" "default_out" {
 }
 
 module "lb_access_logs" {
-  count         = var.lb_enable_load_balancer ? 1 : 0
+  count         = var.lb_enable_load_balancer && var.lb_log_s3_bucket_name != "" ? 1 : 0
   source        = "terraform-aws-modules/s3-bucket/aws"
   version       = "~> 4.1"
   bucket        = var.lb_log_s3_bucket_name
