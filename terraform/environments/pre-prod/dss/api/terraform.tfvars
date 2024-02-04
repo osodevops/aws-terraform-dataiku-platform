@@ -124,7 +124,7 @@ lb_https_port = 443
 # Whether the load-balancer should be internal or external
 lb_internal = true
 
-# Should load-balancer access be logged to an S3 bucket. Provide the name fo a pre-existing S3 bucket
+# Should load-balancer access be logged to an S3 bucket. Provide the name of a pre-existing S3 bucket
 lb_logs_s3_enabled    = false
 lb_log_s3_bucket_name = ""
 
