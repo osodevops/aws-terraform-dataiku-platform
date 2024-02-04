@@ -54,8 +54,8 @@ resource "aws_alb_listener" "https" {
 
 resource "aws_alb_target_group" "tg" {
   count    = var.lb_enable_load_balancer ? 1 : 0
-  // target group name limited to 32 characters and only alpha + num + hypens
-  name     = "${local.resource_title}-dss-ui-alb"
+  // target group name limited to 32 characters and only alpha + num + hyphens
+  name     = local.resource_title
   port     = var.dss_service_port
   protocol = var.dss_service_protocol
   vpc_id   = one(data.aws_vpc.dataiku_dss.*.id)
@@ -72,7 +72,7 @@ resource "aws_alb_target_group" "tg" {
   }
 
   tags = {
-    "Name" : "${local.resource_title}-dss-ui-alb"
+    "Name" : local.resource_title
   }
 
   // based on https://github.com/hashicorp/terraform/issues/12634
@@ -83,7 +83,7 @@ resource "aws_alb_target_group" "tg" {
 
 resource "aws_alb" "dataiku_dss" {
   count                      = var.lb_enable_load_balancer ? 1 : 0
-  name                       = "${local.resource_title}-dss-pub-ui"
+  name                       = local.resource_title
   subnets                    = data.aws_subnets.public.ids
   internal                   = var.lb_internal
   enable_deletion_protection = var.lb_enable_deletion_protection
@@ -99,7 +99,7 @@ resource "aws_alb" "dataiku_dss" {
   }
 
   tags = {
-    "Name" : "${local.resource_title}-dss-pub-ui",
+    "Name" : local.resource_title,
     "DssNode" : title(var.dss_node_type)
   }
 
