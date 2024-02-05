@@ -10,5 +10,14 @@ dss_license_file: license.json
 dss_admin_password: "173_override_this_value_GFG$"
 spark_plugin_version: "3.0.1"
 dss_port: 12800
-
+enable_r4: false
 dataiku_download_url: "https://downloads.dataiku.com/public/studio/"
+
+# The DSS licence is required at build time for some node types
+licence_file_path: /tmp/licence
+licence_source: parameter-store
+#licence_source: secrets-manager
+#licence_source: hashicorp-vault
+licence_backend_path: /dss/licence
+vault_endpoint: "http://172.0.0.1:8200/"
+vault_token: "vault-plaintext-root-token"
