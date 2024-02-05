@@ -15,6 +15,7 @@ dataiku_download_url: "https://downloads.dataiku.com/public/studio/"
 
 # The DSS licence is required at build time for some node types
 licence_file_path: /tmp/licence
+licence_region: eu-west-2
 licence_source: parameter-store
 #licence_source: secrets-manager
 #licence_source: hashicorp-vault
