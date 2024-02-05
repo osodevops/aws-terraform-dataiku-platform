@@ -114,7 +114,7 @@
   become: true
   copy:
     dest: "{{licence_file_path}}"
-    content: lookup('aws_ssm', "{{licence_param_store_path}}", decrypt=true)
+    content: lookup('aws_ssm', "{{licence_backend_path}}", decrypt=true)
     mode: 0400
   when: licence_source == "parameter-store"
 
