@@ -112,6 +112,7 @@
 
 - name: Get licence from parameter store
   become: true
+  become_user: "{{dss_service_user}}"
   copy:
     dest: "{{licence_file_path}}"
     content: lookup('aws_ssm', licence_backend_path, decrypt=true)
@@ -120,6 +121,7 @@
 
 - name: Get licence from secrets manager
   become: true
+  become_user: "{{dss_service_user}}"
   copy:
     dest: "{{licence_file_path}}"
     content: lookup('amazon.aws.aws_secret', licence_backend_path, bypath=true)
@@ -128,6 +130,7 @@
 
 - name: Get licence from Hashicorp Vault
   become: true
+  become_user: "{{dss_service_user}}"
   copy:
     dest: "{{licence_file_path}}"
     content: lookup('hashi_vault', "secret={{licence_backend_path}} token={{vault_token}} url={{vault_endpoint}}")
