@@ -23,14 +23,23 @@ class Config(JsonParser):
         if not self["dss"].get('admin_key'):
             token = ""
             try:
-                dsscli_output = subprocess.run(
-                    f"su - dataiku -c '{deployed_path}/bin/dsscli api-keys-list --output json --no-header'",
-                    shell=True,
-                    check=True, capture_output=True)
-                for key in json.loads(dsscli_output.stdout.decode()):
-                    if key[user] is True:
+                # Unfortunately, we require some different logic depending on the DSS node
+                if self.my_sub_category == "api":
+                    dsscli_output = subprocess.run(
+                        f"su - dataiku -c '{deployed_path}/bin/apinode-admin admin-keys-list --output json --no-header'",
+                        shell=True,
+                        check=True, capture_output=True)
+                    for key in json.loads(dsscli_output.stdout.decode()):
                         token = key['key']
-                    break
+                else:
+                    dsscli_output = subprocess.run(
+                        f"su - dataiku -c '{deployed_path}/bin/dsscli api-keys-list --output json --no-header'",
+                        shell=True,
+                        check=True, capture_output=True)
+                    for key in json.loads(dsscli_output.stdout.decode()):
+                        if key[user] is True:
+                            token = key['key']
+                        break
             except subprocess.CalledProcessError as err:
                 logger.critical(f"Error: Could not get the api keys via dsscli: {err.output}")
             except (KeyError, json.JSONDecodeError):

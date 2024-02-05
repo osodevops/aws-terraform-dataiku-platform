@@ -50,21 +50,26 @@ def main():
         dss_service_settings=dss_service_settings
     )
 
-    # Common actions for all nodes
-    configurator.action_set_admin_password(dss_config['set_admin_password'])
-    configurator.action_configure_license(dss_config['update_license'])
-    configurator.action_configure_install_ini(dss_config['install_ini_settings'])
-    configurator.action_configure_user_profile(dss_config['set_user_profile'])
-    configurator.action_configure_cgroups(dss_config['cgroups'])
-    configurator.action_create_ssh_keys(dss_config['populate_ssh_keys'])
-    configurator.action_configure_saml(dss_config['saml'])
-
     if system_config.node_type == 'automation':
+        configurator.action_set_admin_password(dss_config['set_admin_password'])
+        configurator.action_configure_license(dss_config['update_license'])
+        configurator.action_configure_install_ini(dss_config['install_ini_settings'])
+        configurator.action_configure_user_profile(dss_config['set_user_profile'])
+        configurator.action_configure_cgroups(dss_config['cgroups'])
+        configurator.action_create_ssh_keys(dss_config['populate_ssh_keys'])
+        configurator.action_configure_saml(dss_config['saml'])
         configurator.action_store_admin_api_token(f"dss/{system_config.node_type}/automation/api_key")
         configurator.action_create_connections(dss_config['connections'])
         configurator.action_set_global_variables(dss_config['global_variables'])
 
     if system_config.node_type == 'design':
+        configurator.action_set_admin_password(dss_config['set_admin_password'])
+        configurator.action_configure_license(dss_config['update_license'])
+        configurator.action_configure_install_ini(dss_config['install_ini_settings'])
+        configurator.action_configure_user_profile(dss_config['set_user_profile'])
+        configurator.action_configure_cgroups(dss_config['cgroups'])
+        configurator.action_create_ssh_keys(dss_config['populate_ssh_keys'])
+        configurator.action_configure_saml(dss_config['saml'])
         configurator.action_install_plugins(dss_config['plugins'])
         configurator.action_build_code_environments(dss_config['plugins'])
         configurator.action_attach_cluster(dss_config['eks_cluster'])
@@ -78,6 +83,13 @@ def main():
         configurator.action_store_admin_api_token()
 
     if system_config.node_type == 'deployer':
+        configurator.action_set_admin_password(dss_config['set_admin_password'])
+        configurator.action_configure_license(dss_config['update_license'])
+        configurator.action_configure_install_ini(dss_config['install_ini_settings'])
+        configurator.action_configure_user_profile(dss_config['set_user_profile'])
+        configurator.action_configure_cgroups(dss_config['cgroups'])
+        configurator.action_create_ssh_keys(dss_config['populate_ssh_keys'])
+        configurator.action_configure_saml(dss_config['saml'])
         configurator.action_store_admin_api_token()
 
 if __name__ == "__main__":
