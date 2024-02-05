@@ -134,10 +134,10 @@
   include_tasks: deployer.yml
   when: dss_node_type == "deployer"
 
-#- name: Remove temporary licence file
-#  file:
-#    path: "{{licence_file_path}}"
-#    state: absent
+- name: Remove temporary licence file
+  file:
+    path: "{{licence_file_path}}"
+    state: absent
 
 - name: Install boot service
   become: true
