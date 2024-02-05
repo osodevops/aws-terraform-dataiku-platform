@@ -110,32 +110,13 @@
       {{dss_install_dir_location}}/dataiku-dss-{{dss_version}}/scripts/install/install-deps.sh -with-r -yes 2>&1 > /tmp/dss-install-deps.log
   tags: [setup, dss-setup]
 
-- name: Get licence from parameter store
+- name: Get licence from data backend
   become: true
-  become_user: "{{dss_service_user}}"
-  copy:
+  template:
+    src: licence.j2
     dest: "{{licence_file_path}}"
-    content: "{{lookup('aws_ssm', licence_backend_path, decrypt=true)}}"
-    mode: 0400
-  when: licence_source == "parameter-store"
-
-- name: Get licence from secrets manager
-  become: true
-  become_user: "{{dss_service_user}}"
-  copy:
-    dest: "{{licence_file_path}}"
-    content: "{{lookup('amazon.aws.aws_secret', licence_backend_path, bypath=true)}}"
-    mode: 0400
-  when: licence_source == "secrets-manager"
-
-- name: Get licence from Hashicorp Vault
-  become: true
-  become_user: "{{dss_service_user}}"
-  copy:
-    dest: "{{licence_file_path}}"
-    content: "{{lookup('hashi_vault', \"secret=licence_backend_path token=vault_token url=vault_endpoint\")}}"
-    mode: 0400
-  when: licence_source == "hashicorp-vault"
+    mode: 0440
+    owner: "{{dss_service_user}}"
 
 - name: Install this image as a design node
   include_tasks: design.yml
@@ -152,6 +133,11 @@
 - name: Install this image as a deployer node
   include_tasks: deployer.yml
   when: dss_node_type == "deployer"
+
+#- name: Remove temporary licence file
+#  file:
+#    path: "{{licence_file_path}}"
+#    state: absent
 
 - name: Install boot service
   become: true

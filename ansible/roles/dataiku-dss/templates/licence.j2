@@ -1,0 +1,7 @@
+{%  if licence_source == "parameter-store" %}
+{{lookup('aws_ssm', licence_backend_path, decrypt=true)}}
+{%  elif licence_source == "secrets-manager" %}
+{{lookup('amazon.aws.aws_secret', licence_backend_path, bypath=true)}}
+{%  elif licence_source == "hashicorp-vault" %}
+{{lookup('hashi_vault', "secret=" + licence_backend_path + "token=" + vault_token + "url=" + vault_endpoint)}}
+{% endif %}
