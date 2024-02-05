@@ -1,0 +1,87 @@
+---
+
+- name: Install DSS
+  become: true
+  become_user: "{{dss_service_user}}"
+  command: "{{dss_install_dir_location}}/dataiku-dss-{{dss_version}}/installer.sh -d {{dss_data_dir_location}} -p {{dss_port}}"
+  args:
+    creates: "{{dss_data_dir_location}}/dss-version.json"
+  tags: [dss]
+
+- name: Download hadoop integration
+  get_url:
+    url: "{{dataiku_download_url}}/{{dss_version}}/dataiku-dss-hadoop-standalone-libs-generic-hadoop3-{{dss_version}}.tar.gz"
+    dest: "{{dss_install_dir_location}}/dataiku-dss-hadoop-standalone-libs-generic-hadoop3-{{dss_version}}.tar.gz"
+  become: true
+  become_user: "{{dss_service_user}}"
+
+- name: Load hadoop integration
+  command: "{{dss_data_dir_location}}/bin/dssadmin install-hadoop-integration -standaloneArchive {{dss_install_dir_location}}/dataiku-dss-hadoop-standalone-libs-generic-hadoop3-{{dss_version}}.tar.gz"
+  become: true
+  become_user: "{{dss_service_user}}"
+
+- name: Download spark integration
+  get_url:
+    url: "{{dataiku_download_url}}/{{dss_version}}/dataiku-dss-spark-standalone-{{dss_version}}-{{spark_plugin_version}}-generic-hadoop3.tar.gz"
+    dest: "{{dss_install_dir_location}}/dataiku-dss-spark-standalone-{{dss_version}}-{{spark_plugin_version}}-generic-hadoop3.tar.gz"
+  become: true
+  become_user: "{{dss_service_user}}"
+
+- name: Load spark integration
+  command: "{{dss_data_dir_location}}/bin/dssadmin install-spark-integration -standaloneArchive {{dss_install_dir_location}}/dataiku-dss-spark-standalone-{{dss_version}}-{{spark_plugin_version}}-generic-hadoop3.tar.gz"
+  become: true
+  become_user: "{{dss_service_user}}"
+
+- name: Install R4
+  become: true
+  command: "amazon-linux-extras install R4"
+  tags: [setup]
+  when: enable_r4
+
+- name: R integration
+  command: "{{dss_data_dir_location}}/bin/dssadmin install-R-integration"
+  become: true
+  become_user: "{{dss_service_user}}"
+
+- name: Download kubectl
+  get_url:
+    url: "https://dl.k8s.io/release/{{kubectl_version}}/bin/linux/amd64/kubectl"
+    dest: "/usr/bin/kubectl"
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: Download eksctl
+  get_url:
+    url:  "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_linux_amd64.tar.gz"
+    dest: "/tmp/eksctl.tar.gz"
+
+- name: Unarchive eksctl
+  become: true
+  unarchive:
+    src: "/tmp/eksctl.tar.gz"
+    dest: "/usr/bin"
+    creates: "/usr/bin/eksctl"
+    remote_src: yes
+  tags: [setup, dss-setup]
+
+# Install the graphics modelling extension (google chrome)
+- name: Install Node for graphics extension
+  become: true
+  become_user: "{{dss_service_user}}"
+  shell:
+    cmd: |
+      /usr/bin/curl -o /tmp/install-nvm.sh https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh
+      chmod +x /tmp/install-nvm.sh
+      /tmp/install-nvm.sh
+      .  ~/.nvm/nvm.sh
+      nvm install 16.18.0
+
+- name: Install graphics extension
+  become: true
+  become_user: "{{dss_service_user}}"
+  shell:
+    cmd: |
+      .  ~/.nvm/nvm.sh
+      {{dss_data_dir_location}}/bin/dssadmin install-graphics-export  -noDeps

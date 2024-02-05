@@ -25,7 +25,7 @@ def main():
     system_config.load_system_config()
     dss_config = Config(
         aws_region=system_config.aws_settings["aws_region"],
-        sub_categories=['api', 'design', 'automation'],
+        sub_categories=['api', 'design', 'automation', 'deployer'],
         my_category=system_config.node_type
     )
     dss_config.load_data(system_config.get_config_data())
@@ -77,6 +77,8 @@ def main():
     if system_config.node_type == 'api':
         configurator.action_store_admin_api_token()
 
+    if system_config.node_type == 'deployer':
+        configurator.action_store_admin_api_token()
 
 if __name__ == "__main__":
     # execute only if run as a script

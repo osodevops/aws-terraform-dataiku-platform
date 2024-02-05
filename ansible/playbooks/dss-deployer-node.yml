@@ -1,0 +1,16 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: yes
+  vars:
+    dss_version: "12.4.2" #https://doc.dataiku.com/dss/latest/release_notes/11.html#releases-notes-11-limitations
+    dss_api_version: "12.4.0" #https://pypi.org/project/dataiku-api-client/
+    spark_plugin_version: "3.4.1" #https://downloads.dataiku.com/public/dss/12.4.0/
+    dss_port: 11200
+    kubectl_version: "v1.20.10"
+    dss_admin_password: "173_override_this_value_GFG$"
+    dss_node_type: deployer
+    is_jmx_enabled: true
+    collect_default_metrics_enabled: true
+  roles:
+    - role: dataiku-dss
