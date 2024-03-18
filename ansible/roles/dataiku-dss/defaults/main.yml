@@ -8,11 +8,11 @@ dss_node_poll_fqdn: true # If true, use ansible_fqdn else use ansible_host
 dataiku_download_url: "https://downloads.dataiku.com/public/studio/"
 
 # The DSS licence is required at build time for some node types
-licence_region: eu-west-2
-licence_source: parameter-store
-#licence_source: secrets-manager
-#licence_source: hashicorp-vault
-licence_backend_path: /dss/licence
-licence_file_path: /tmp/licence
+license_region: eu-west-2
+license_source: parameter-store
+#license_source: secrets-manager
+#license_source: hashicorp-vault
+license_backend_path: /dss/licence
+license_file_path: /tmp/licence
 vault_endpoint: "http://172.0.0.1:8200/"
 vault_token: "vault-plaintext-root-token"

@@ -114,7 +114,7 @@
   become: true
   template:
     src: licence.j2
-    dest: "{{licence_file_path}}"
+    dest: "{{license_file_path}}"
     mode: 0440
     owner: "{{dss_service_user}}"
 
@@ -136,7 +136,7 @@
 
 - name: Remove temporary licence file
   file:
-    path: "{{licence_file_path}}"
+    path: "{{license_file_path}}"
     state: absent
 
 - name: Install boot service

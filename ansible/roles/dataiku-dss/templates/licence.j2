@@ -1,7 +1,7 @@
-{%  if licence_source == "parameter-store" %}
-{{lookup('aws_ssm', licence_backend_path, decrypt=true, region=licence_region)}}
-{%  elif licence_source == "secrets-manager" %}
-{{lookup('amazon.aws.aws_secret', licence_backend_path, bypath=true, region=licence_region)}}
-{%  elif licence_source == "hashicorp-vault" %}
-{{lookup('hashi_vault', "secret=" + licence_backend_path + "token=" + vault_token + "url=" + vault_endpoint)}}
+{%  if license_source == "parameter-store" %}
+{{lookup('aws_ssm', license_backend_path, decrypt=true, region=license_region)}}
+{%  elif license_source == "secrets-manager" %}
+{{lookup('amazon.aws.aws_secret', license_backend_path, bypath=true, region=license_region)}}
+{%  elif license_source == "hashicorp-vault" %}
+{{lookup('hashi_vault', "secret=" + license_backend_path + "token=" + vault_token + "url=" + vault_endpoint)}}
 {% endif %}
