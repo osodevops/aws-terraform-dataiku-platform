@@ -3,7 +3,17 @@
 - name: Install DSS
   become: true
   become_user: "{{dss_service_user}}"
-  command: "{{dss_install_dir_location}}/dataiku-dss-{{dss_version}}/installer.sh -t api -d {{dss_data_dir_location}} -p {{dss_port}} -l {{licence_file_path}}"
+  command: "{{dss_install_dir_location}}/dataiku-dss-{{dss_version}}/installer.sh -t api -d {{dss_data_dir_location}} -p {{dss_port}} -l {{license_file_path}}"
   args:
     creates: "{{dss_data_dir_location}}/dss-version.json"
   tags: [dss]
+  when: install_with_license
+
+- name: Install DSS
+  become: true
+  become_user: "{{dss_service_user}}"
+  command: "{{dss_install_dir_location}}/dataiku-dss-{{dss_version}}/installer.sh -t api -d {{dss_data_dir_location}} -p {{dss_port}}"
+  args:
+    creates: "{{dss_data_dir_location}}/dss-version.json"
+  tags: [dss]
+  when: not install_with_license

@@ -61,6 +61,7 @@ def main():
         configurator.action_store_admin_api_token(f"dss/{system_config.node_type}/automation/api_key")
         configurator.action_create_connections(dss_config['connections'])
         configurator.action_set_global_variables(dss_config['global_variables'])
+        configurator.action_docker_pull()
 
     if system_config.node_type == 'design':
         configurator.action_set_admin_password(dss_config['set_admin_password'])

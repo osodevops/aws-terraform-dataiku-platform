@@ -1,24 +1,18 @@
 ---
-dss_version: "11.1.1"
-dss_api_version: "5.1"
 dss_service_user: dataiku
 dss_service_user_home: /home/dataiku
-dss_install_dir_location: /home/dataiku
+package_tmp_dir: /var/tmp
+dss_install_dir_location: /data
 dss_data_dir_location: /data/dataiku
 dss_node_poll_fqdn: true # If true, use ansible_fqdn else use ansible_host
-dss_license_file: license.json
-dss_admin_password: "173_override_this_value_GFG$"
-spark_plugin_version: "3.0.1"
-dss_port: 12800
-enable_r4: false
 dataiku_download_url: "https://downloads.dataiku.com/public/studio/"
 
 # The DSS licence is required at build time for some node types
-licence_file_path: /tmp/licence
 licence_region: eu-west-2
 licence_source: parameter-store
 #licence_source: secrets-manager
 #licence_source: hashicorp-vault
 licence_backend_path: /dss/licence
+licence_file_path: /tmp/licence
 vault_endpoint: "http://172.0.0.1:8200/"
 vault_token: "vault-plaintext-root-token"
