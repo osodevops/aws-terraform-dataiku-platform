@@ -79,7 +79,7 @@
   become_user: "{{dss_service_user}}"
   ansible.builtin.unarchive:
     src: "{{package_tmp_dir}}/jdbc.tar.gz"
-    dest: "{{dss_jdbc_dir_location}}/lib/jdbc/"
+    dest: "{{dss_jdbc_dir_location}}/"
 
 - name: Download kubectl
   become: true
@@ -95,7 +95,7 @@
   get_url:
     url:  "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_linux_amd64.tar.gz"
     dest: "{{package_tmp_dir}}/eksctl.tar.gz"
-    tags: [dss]
+  tags: [dss]
 
 - name: Unarchive eksctl
   become: true
