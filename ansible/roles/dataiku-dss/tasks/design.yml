@@ -66,6 +66,14 @@
     url: "{{jdbc_download_tgz_url}}"
     dest: "{{package_tmp_dir}}/jdbc.tar.gz"
 
+- name: Create JDBC directory
+  become: true
+  become_user: "{{dss_service_user}}"
+  file:
+    path: "{{dss_jdbc_dir_location}}"
+    state: directory
+    mode: "u=rwx,g=rx,o="
+
 - name: Unpack JDBC driver
   become: true
   become_user: "{{dss_service_user}}"

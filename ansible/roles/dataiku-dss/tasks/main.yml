@@ -76,7 +76,6 @@
   loop:
     - "{{dss_data_dir_location}}"
     - "{{dss_install_dir_location}}"
-    - "{{dss_jdbc_dir_location}}"
   tags: [setup, dss-setup]
 
 - name: Install jq via yum
