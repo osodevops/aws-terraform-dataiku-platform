@@ -1,0 +1,55 @@
+- name: Tarball packages - Create temporary unpacking directory
+  become: true
+  become_user: "{{dss_service_user}}"
+  file:
+    path: "{{tar_package_tmp_dir}}"
+    state: directory
+    mode: "u=rwx,g=rx,o="
+    recurse: true
+  tags: [dss]
+
+- name: Tarball packages - Create target directory
+  become: true
+  become_user: "{{dss_service_user}}"
+  file:
+    path: "{{tar_dest_dir}}"
+    state: directory
+    mode: "u=rwx,g=rx,o="
+    recurse: true
+  tags: [dss]
+
+- name: Tarball packages - Download tar package
+  become: true
+  become_user: "{{dss_service_user}}"
+  ansible.builtin.uri:
+    url: "{{tar_download_tgz_url}}"
+    dest: "{{tar_package_tmp_dir}}/{{tar_tarball_name}}"
+    creates: "{{tar_package_tmp_dir}}/{{tar_tarball_name}}"
+  tags: [dss]
+
+- name: Tarball packages - Unpack tar
+  become: true
+  become_user: "{{dss_service_user}}"
+  ansible.builtin.unarchive:
+    include: "{{tar_src_filename}}"
+    src: "{{tar_package_tmp_dir}}/{{tar_tarball_name}}"
+    dest: "{{tar_package_tmp_dir}}"
+    creates: "{{tar_package_tmp_dir}}/{{tar_src_filename}}"
+  tags: [dss]
+
+- name: Tarball packages - Copy single file
+  become: true
+  become_user: "{{dss_service_user}}"
+  copy:
+    src: "{{tar_package_tmp_dir}}/{{tar_src_filename}}"
+    dest: "{{tar_dest_dir}}/{{tar_dest_filename}}"
+    remote_src: true
+  tags: [dss]
+
+- name: Tarball packages - Cleanup downloaded artefacts
+  become: true
+  become_user: "{{dss_service_user}}"
+  file:
+    path: "{{tar_package_tmp_dir}}"
+    state: absent
+  tags: [ dss ]

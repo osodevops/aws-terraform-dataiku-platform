@@ -59,27 +59,15 @@
   when: enable_r
   tags: [dss]
 
-- name: Download JDBC driver
-  become: true
-  become_user: "{{dss_service_user}}"
-  ansible.builtin.uri:
-    url: "{{jdbc_download_tgz_url}}"
-    dest: "{{package_tmp_dir}}/jdbc.tar.gz"
-
-- name: Create JDBC directory
-  become: true
-  become_user: "{{dss_service_user}}"
-  file:
-    path: "{{dss_jdbc_dir_location}}"
-    state: directory
-    mode: "u=rwx,g=rx,o="
-
-- name: Unpack JDBC driver
-  become: true
-  become_user: "{{dss_service_user}}"
-  ansible.builtin.unarchive:
-    src: "{{package_tmp_dir}}/jdbc.tar.gz"
-    dest: "{{dss_jdbc_dir_location}}/"
+- name: install tarball - JDBC
+  include_tasks: import_tar.yml
+  vars:
+    tar_package_tmp_dir: "{{jdbc_package_tmp_dir}}"
+    tar_download_tgz_url: "{{jdbc_download_tgz_url}}"
+    tar_tarball_name: "{{jdbc_tarball_name}}"
+    tar_src_filename: "{{jdbc_src_filename}}"
+    tar_dest_dir: "{{jdbc_dest_dir}}"
+    tar_dest_filename: "{{jdbc_dest_filename}}"
 
 - name: Download kubectl
   become: true
