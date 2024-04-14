@@ -1,4 +1,4 @@
 #!/bin/bash -eux
 
 # Install Ansible.
-sudo pip3 install ansible
+pip3 install ansible boto3 botocore
