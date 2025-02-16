@@ -114,7 +114,29 @@ DSS can be deployed in different configurations based on requirements. Example a
 All-in-one single AWS account featuring EKS for containerized workloads, plus non-prod and production API and automation instances
 
 ![dataiku all in one aws account](./images/dataiku%20all%20in%20one%20aws%20account.png)
- 
+
+
+## 6. Monitoring and Alerts
+DSS includes CloudWatch alarms for:
+
+- High CPU utilization alerts
+- Instance failure notifications
+
+## 7. Backup & Recovery
+DSS data is stored on EBS volumes with backups managed via AWS DLM and real-time snapshot automation.
+
+- **Boot Behavior**: DSS nodes restore from the latest snapshot on startup.
+- **Scheduled Backups**: AWS DLM schedules periodic snapshots.
+- **Real-Time Snapshots**: Automation captures snapshots upon instance termination.
+
+## 8. Troubleshooting
+Common issues and solutions:
+
+- **DSS Service Not Running**: Verify `/data/dataiku` mount and check logs.
+- **Corrupt Data Snapshot**: Manually delete and use the next available snapshot.
+
+## 9. Next Steps
+If you would like us to support you through this deployment process, please email [enquires@oso.sh](mailto:enquires@oso.sh) or visit out website [oso.sh](https://oso.sh).
 
 ## Usage
 
