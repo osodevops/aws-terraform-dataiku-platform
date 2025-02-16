@@ -136,7 +136,7 @@ Common issues and solutions:
 - **Corrupt Data Snapshot**: Manually delete and use the next available snapshot.
 
 ## 9. Next Steps
-If you would like us to support you through this deployment process, please email [enquiries@oso.sh](mailto:enquiries@oso.sh) or visit out website [oso.sh](https://oso.sh).
+If you would like us to support you through this deployment process, please email [enquiries@oso.sh](mailto:enquiries@oso.sh) or visit out website [oso.sh](https://oso.sh?utm_source=github&utm_medium=web&utm_campaign=dataiku).
 
 ## Usage
 
