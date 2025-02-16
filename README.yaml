@@ -9,7 +9,7 @@ name: "Dataiku Terraform Deployment on AWS"
 
 # Short description of this project
 description: |-
-  This public multi Terraform module repo contains the deployment components for deploying Dataiku DSS on AWS. It is aimed at cloud architects, administrators, and DevOps professionals who are planning to implement or extend their DSS custom deployments on AWS.
+  Multi Terraform module repo contains the deployment components for deploying Dataiku DSS on AWS. It is aimed at cloud architects, administrators, and DevOps professionals who are planning to implement or extend their DSS custom deployments on AWS.
 
 
 # Canonical GitHub repo
