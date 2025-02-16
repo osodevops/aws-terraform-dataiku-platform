@@ -108,9 +108,11 @@ DSS can be deployed in different configurations based on requirements. Example a
 - Simple deployment with Design and Automation nodes
 - Deployment with EKS for containerized workloads
 - Multi-account deployment with API and Automation instances
+
 ![dataiku DSS architecture](./images/dataiku%20dss%20architecture.png)
 
 All-in-one single AWS account featuring EKS for containerized workloads, plus non-prod and production API and automation instances
+
 ![dataiku all in one aws account](./images/dataiku%20all%20in%20one%20aws%20account.png)
  
 
