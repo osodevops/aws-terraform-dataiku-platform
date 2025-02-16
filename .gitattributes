@@ -1,5 +1,5 @@
 # Exclude specific file types from language stats
-*.python linguist-detectable=false
+*.py linguist-detectable=false
 
 # Force detection for specific file types
 *.tf linguist-language=HCL
