@@ -1,0 +1,37 @@
+---
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+# Name of this project
+name: "Dataiku Terraform Deployment on AWS"
+
+# Short description of this project
+description: |-
+  This public multi Terraform module repo contains the deployment components for deploying Dataiku DSS on AWS. It is aimed at cloud architects, administrators, and DevOps professionals who are planning to implement or extend their DSS custom deployments on AWS.
+
+
+# Canonical GitHub repo
+github_repo: osodevops/aws-terraform-dataiku-platform
+
+# How to use this project
+usage: |-
+  Features of this module include:
+    - Dataiku DSS clustering
+    - Deploy HA Green / Blue API server.
+    - Automatic backup and restore from S3.
+    - Multi-dimensional scaling, allowing you to separately scale data and UI management nodes.
+    - Auto healing architecture.
+    - Automatic bootstrapping of custom AMI with user-data.
+    - Ability to customised install with Packer builder.
+    - HIPPA and NIST 800-53 compliant.
+
+
+related:
+  - name: "OSO CodeBuild"
+    description: "used to to build a repeatable Dataiku AMI"
+    url: "https://github.com/osodevops/aws-terraform-module-codebuild-packer"
+
+# References
+references:
