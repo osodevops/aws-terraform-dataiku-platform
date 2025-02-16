@@ -31,10 +31,88 @@ Multi Terraform module repo contains the deployment components for deploying Dat
 
 ---
 
+## 1. Introduction
+This deployment guide provides step-by-step instructions for deploying Dataiku DSS on AWS. It is aimed at cloud architects, administrators, and DevOps professionals who are planning to implement or extend their DSS custom deployments on AWS.
 
+Dataiku DSS (Data Science Studio) is a hosted solution for creating, deploying, and managing Machine Learning models and AI projects in production environments. DSS users can:
 
+- Incorporate diverse data sources, then clean, transform, and prepare data for analysis.
+- Create predictive models using a visual interface or by writing custom code.
+- Automate data workflows, including data preparation, model training, and deployment.
+- Integrate custom code written in languages like Python, R, SQL.
+- Leverage Kubernetes, Spark, and Hadoop.
 
+### 1.1 The OSO DSS Deployment Codebase
+Referred to as the "DSS module" in this guide, the codebase is a complete solution for deploying Dataiku DSS in AWS. It features:
 
+- **Terraform modules** for infrastructure:
+  - CodeBuild jobs for building DSS AMIs
+  - Deploy EC2 DSS nodes with Autoscaling Groups for multi-AZ redundancy
+  - Deploy rapid disaster recovery infrastructure
+- **Ansible roles** for performing all DSS initial configuration tasks
+- **Python automation** for disaster recovery and runtime configuration
+
+### 1.2 Codebase Infrastructure and Mechanics
+The DSS module deploys the following components:
+
+#### 1.2.1 Repeatable AMI Builds
+The DSS module contains Terraform wrappers that produce AWS CodeBuild jobs for each type of DSS node (Design, Automation, and API). These jobs handle initial DSS setup and OS configuration.
+![ami builds for dataiku](./images/ami builds for dataiku.png)
+
+#### 1.2.2 EC2 Node Deployments with Autoscaling Groups
+DSS nodes are deployed across AWS accounts and VPCs using Autoscaling Groups for redundancy, treating EC2 instances as ephemeral.
+![Dataiku HA and rapid restore](./images/ami%20builds%20for%20dataiku.png)
+
+#### 1.2.3 Run-time Disaster Recovery Automation
+Automation handles "last-mile" runtime configuration and snapshot restoration across AZs to ensure minimal downtime and zero data loss.
+![dataiku disaster recovery automation](./images/dataiku%20disaster%20recovery%20automation.png)
+
+## 2. Prerequisites
+
+### 2.1 Technical Requirements
+To deploy DSS on AWS, you need:
+
+- Active AWS account
+- DSS license allowing custom deployments  (plus any optional features such as API node capability). Free trials are also available via the Dataiku website (https://www.dataiku.com/product/get-started/)
+- (Optional) Domain managed by Route 53
+- (Optional) SSL certificate in AWS Certificate Manager
+
+### 2.2 Required AWS Services Knowledge
+Familiarity with AWS services such as EC2, S3, VPC, CodeBuild, ACM, Route 53, ALB, NLB, EBS is recommended.
+
+### 2.3 Licenses and Costs
+You are responsible for AWS service costs. DSS requires a license, which can be obtained from [Dataiku](https://www.dataiku.com/product/get-started/).
+
+## 3. Source Code and Features
+The deployment guide code is available at [GitHub](https://github.com/osodevops/aws-terraform-dataiku-platform). Features include:
+
+- Terraform modules for AWS deployments
+- Multi-AZ deployments via Autoscaling Groups
+- Ansible and Packer scripts for image customization
+- Python automation for runtime configuration
+- Rapid disaster recovery mechanisms
+
+## 4. AWS CLI & Terraform Setup
+Install the following tools:
+
+1. Create a specific IAM role for use with Terraform. This role will have elevated permissions and ideally should only be used via the “assume-role” mechanic, or via an automated deployment pipeline. Remember to store any security credentials in a secure location and never in a github repository.
+2. Install the AWS CLI version 2. This is for convenience during any spike or assessment phase
+3. Install Hashicorp Terraform. The module pins the terraform version to a specific version. View the terraform area of the repo to find the latest supported version.
+4. Configure shared Terraform state and state locking using AWS S3 and DynamoDB. See here for details (https://developer.hashicorp.com/terraform/language/settings/backends/s3)
+5. Install Python version 3.9.x. This is required for testing the packaged python modules, and for building python payloads for AWS Lambda.
+6. In order for Terraform to be able to make changes in your AWS account, you will need to configure the AWS credentials for the user you created earlier. There are several ways to do this (see Configuring the AWS CLI)
+
+## 5. DSS Architecture
+DSS can be deployed in different configurations based on requirements. Example architectures include:
+
+- Simple deployment with Design and Automation nodes
+- Deployment with EKS for containerized workloads
+- Multi-account deployment with API and Automation instances
+![dataiku DSS architecture](./images/dataiku%20dss%20architecture.png)
+
+All-in-one single AWS account featuring EKS for containerized workloads, plus non-prod and production API and automation instances
+![dataiku all in one aws account](./images/dataiku%20all%20in%20one%20aws%20account.png)
+ 
 
 ## Usage
 
