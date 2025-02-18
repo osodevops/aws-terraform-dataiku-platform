@@ -34,6 +34,8 @@ Multi Terraform module repo contains the deployment components for deploying Dat
 ## 1. Introduction
 This deployment guide provides step-by-step instructions for deploying Dataiku DSS on AWS. It is aimed at cloud architects, administrators, and DevOps professionals who are planning to implement or extend their DSS custom deployments on AWS.
 
+Download the full step by step deployment guide here: [DOWNLOAD](https://oso.sh/dev-tools/dataiku-deployment-library)
+
 Dataiku DSS (Data Science Studio) is a hosted solution for creating, deploying, and managing Machine Learning models and AI projects in production environments. DSS users can:
 
 - Incorporate diverse data sources, then clean, transform, and prepare data for analysis.
